@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace PlannerApi.Controllers
 {
     [Authorize]
+    [Route("Dashboard")]
     public class DashboardController : Controller
     {
         private readonly ILogger<DashboardController> _logger;
@@ -16,55 +17,96 @@ namespace PlannerApi.Controllers
         }
 
         [HttpGet]
-        [Route("/Dashboard")]
+        [Route("")]
         [Route("/")]
         public IActionResult Index()
         {
-            using var db = new Models.ConnectToDb(_configuration);
-            var stats = GetDashboardStats(db);
-            var analytics = GetAnalyticsData(db);
-            var recentActivities = GetRecentActivities(db);
+            try
+            {
+                using var db = new Models.ConnectToDb(_configuration);
+                var stats = GetDashboardStats(db);
+                var analytics = GetAnalyticsData(db);
+                var recentActivities = GetRecentActivities(db);
 
-            ViewBag.Stats = stats;
-            ViewBag.Analytics = analytics;
-            ViewBag.RecentActivities = recentActivities;
-            ViewBag.UserName = User?.Identity?.Name ?? "Пользователь";
+                ViewBag.Stats = stats;
+                ViewBag.Analytics = analytics;
+                ViewBag.RecentActivities = recentActivities;
+                ViewBag.UserName = User?.Identity?.Name ?? "Пользователь";
 
-            return View();
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Dashboard Index");
+                // Возвращаем простую страницу с ошибкой
+                return Content($@"
+                    <html>
+                    <body>
+                        <h1>Ошибка загрузки дашборда</h1>
+                        <p>{ex.Message}</p>
+                        <p>Проверьте подключение к базе данных</p>
+                        <a href='/Account/Login'>Войти снова</a>
+                    </body>
+                    </html>", "text/html");
+            }
         }
 
         [HttpGet("GetStats")]
         public IActionResult GetStats()
         {
-            using var db = new Models.ConnectToDb(_configuration);
-            var stats = GetDashboardStats(db);
-            return Json(stats);
+            try
+            {
+                using var db = new Models.ConnectToDb(_configuration);
+                var stats = GetDashboardStats(db);
+                return Json(stats);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting stats");
+                return Json(new Models.DashboardStats());
+            }
         }
 
         [HttpGet("GetAnalytics")]
         public IActionResult GetAnalytics()
         {
-            using var db = new Models.ConnectToDb(_configuration);
-            var analytics = GetAnalyticsData(db);
-            return Json(analytics);
+            try
+            {
+                using var db = new Models.ConnectToDb(_configuration);
+                var analytics = GetAnalyticsData(db);
+                return Json(analytics);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting analytics");
+                return Json(new Models.AnalyticsData());
+            }
         }
 
         [HttpGet("GetRecentActivities")]
         public IActionResult GetRecentActivitiesApi()
         {
-            using var db = new Models.ConnectToDb(_configuration);
-            var activities = GetRecentActivities(db);
-            return Json(activities);
+            try
+            {
+                using var db = new Models.ConnectToDb(_configuration);
+                var activities = GetRecentActivities(db);
+                return Json(activities);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting recent activities");
+                return Json(new List<Models.Activity>());
+            }
         }
 
         private Models.DashboardStats GetDashboardStats(Models.ConnectToDb db)
         {
             try
             {
-                var tasks = db.GetTasks().ToList();
-                var resources = db.GetResources().ToList();
-                var shifts = db.GetShifts().ToList();
-                var shiftTasks = db.GetShiftTasks().ToList();
+                var tasks = db.GetTasks()?.ToList() ?? new List<Models.Task>();
+                var resources = db.GetResources()?.ToList() ?? new List<Models.Resource>();
+                var shifts = db.GetShifts()?.ToList() ?? new List<Models.Shift>();
+                var shiftTasks = db.GetShiftTasks()?.ToList() ?? new List<Models.ShiftTask>();
 
                 var now = DateTime.UtcNow;
                 var weekAgo = now.AddDays(-7);
@@ -96,9 +138,9 @@ namespace PlannerApi.Controllers
         {
             try
             {
-                var tasks = db.GetTasks().ToList();
-                var shifts = db.GetShifts().ToList();
-                var shiftTasks = db.GetShiftTasks().ToList();
+                var tasks = db.GetTasks()?.ToList() ?? new List<Models.Task>();
+                var shifts = db.GetShifts()?.ToList() ?? new List<Models.Shift>();
+                var shiftTasks = db.GetShiftTasks()?.ToList() ?? new List<Models.ShiftTask>();
 
                 var last30Days = Enumerable.Range(0, 30)
                     .Select(i => DateTime.UtcNow.Date.AddDays(-i))
@@ -145,7 +187,7 @@ namespace PlannerApi.Controllers
                 var activities = new List<Models.Activity>();
 
                 var recentTasks = db.GetTasks()
-                    .OrderByDescending(t => t.time_ins)
+                    ?.OrderByDescending(t => t.time_ins)
                     .Take(5)
                     .Select(t => new Models.Activity
                     {
@@ -154,10 +196,10 @@ namespace PlannerApi.Controllers
                         Description = $"Задача '{t.name}' создана",
                         Timestamp = t.time_ins,
                         User = "System"
-                    });
+                    }) ?? new List<Models.Activity>();
 
                 var recentShifts = db.GetShifts()
-                    .OrderByDescending(s => s.time_ins)
+                    ?.OrderByDescending(s => s.time_ins)
                     .Take(5)
                     .Select(s => new Models.Activity
                     {
@@ -166,7 +208,7 @@ namespace PlannerApi.Controllers
                         Description = $"Смена '{s.name}' запланирована",
                         Timestamp = s.time_ins,
                         User = "System"
-                    });
+                    }) ?? new List<Models.Activity>();
 
                 activities.AddRange(recentTasks);
                 activities.AddRange(recentShifts);
@@ -207,10 +249,10 @@ namespace PlannerApi.Controllers
 
         private Dictionary<string, float> CalculateResourcePerformance(Models.ConnectToDb db)
         {
-            var resources = db.GetResources().ToList();
-            var shifts = db.GetShifts().ToList();
-            var tasks = db.GetTasks().ToList();
-            var shiftTasks = db.GetShiftTasks().ToList();
+            var resources = db.GetResources()?.ToList() ?? new List<Models.Resource>();
+            var shifts = db.GetShifts()?.ToList() ?? new List<Models.Shift>();
+            var tasks = db.GetTasks()?.ToList() ?? new List<Models.Task>();
+            var shiftTasks = db.GetShiftTasks()?.ToList() ?? new List<Models.ShiftTask>();
 
             var performance = new Dictionary<string, float>();
 
