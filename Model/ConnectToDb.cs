@@ -1,11 +1,5 @@
 ﻿using Dapper;
 using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 
 namespace PlannerApi.Models
 {
@@ -18,11 +12,8 @@ namespace PlannerApi.Models
         public static int asincerrors = 0;
         public static bool stop = false;
 
-        public ConnectToDb(IConfiguration configuration)
-        {
-            connectionString = configuration.GetConnectionString("PlannerDb") ??
+        public ConnectToDb(IConfiguration configuration) => connectionString = configuration.GetConnectionString("PlannerDb") ??
                               "Server=localhost;Port=5432;Database=Planner;User Id=postgres;Password=1111;";
-        }
 
         private NpgsqlConnection GetConnection()
         {
