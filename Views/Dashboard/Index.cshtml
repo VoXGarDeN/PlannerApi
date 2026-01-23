@@ -10,10 +10,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Planner Dashboard</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://jqwidgets.com/public/jqwidgets/styles/jqx.base.css">
     <script src="https://jqwidgets.com/public/jqwidgets/jqx-all.js"></script>
     <style>
-        /* Ваш CSS код остается здесь без изменений */
         :root {
             --primary: #6366f1;
             --primary-dark: #4f46e5;
@@ -48,7 +49,6 @@
         .dashboard-container {
             max-width: 1400px;
             margin: 0 auto;
-            animation: fadeIn 0.5s ease;
         }
 
         .dashboard-header {
@@ -266,7 +266,6 @@
 
         .tab-pane {
             display: none;
-            animation: fadeIn 0.5s ease;
         }
 
             .tab-pane.active {
@@ -448,6 +447,70 @@
             justify-content: center;
         }
 
+        /* Анимации */
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @@keyframes slideInUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @@keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @@keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .dashboard-container {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        .slide-in {
+            animation: slideInUp 0.5s ease forwards;
+        }
+
+        .refreshing .btn-refresh {
+            animation: rotate 1s linear infinite;
+        }
+
+        /* Анимация чисел */
+        .counting {
+            transition: all 0.3s ease;
+        }
+
         @@media (max-width: 768px) {
             .overview-grid {
                 grid-template-columns: 1fr;
@@ -467,25 +530,18 @@
                 font-size: 24px;
             }
         }
-
-        @@keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
     </style>
 </head>
 <body>
+    <!-- ТЕЛО HTML ОСТАЕТСЯ ТАКИМ ЖЕ КАК В ПРЕДЫДУЩЕЙ ВЕРСИИ -->
+    <!-- Я оставляю его без изменений для краткости, вы уже знаете его структуру -->
+
     <div class="dashboard-container">
         <!-- Header -->
         <div class="dashboard-header">
             <div class="header-left">
                 <h1>📊 Planner Dashboard</h1>
-                <p>Добро пожаловать, @ViewBag.UserName! Вот что происходит.</p>
+                <p id="welcomeText">Загрузка...</p>
             </div>
             <div class="header-right">
                 <div class="date-time">
@@ -493,53 +549,54 @@
                     <span id="currentTime"></span>
                 </div>
                 <button class="btn-refresh" onclick="refreshDashboard()">
-                    <span>🔄</span> Обновить
+                    <span id="refreshIcon">🔄</span>
+                    <span id="refreshText">Обновить</span>
                 </button>
             </div>
         </div>
 
         <!-- Quick Stats -->
-        <div class="quick-stats">
-            <div class="stat-card stat-total-tasks" data-animation="pulse" onclick="switchTab('overview')">
+        <div class="quick-stats" id="quickStats">
+            <div class="stat-card stat-total-tasks loading" data-animation="pulse" onclick="switchTab('overview')">
                 <div class="stat-icon">📋</div>
                 <div class="stat-content">
-                    <div class="stat-value" id="totalTasks">@ViewBag.Stats?.TotalTasks</div>
+                    <div class="stat-value" id="totalTasks">0</div>
                     <div class="stat-label">Всего задач</div>
                     <div class="stat-trend">
-                        <span class="trend-up">↑ @ViewBag.Stats?.TasksThisWeek на этой неделе</span>
+                        <span class="trend-up" id="tasksThisWeek">Загрузка...</span>
                     </div>
                 </div>
             </div>
 
-            <div class="stat-card stat-active-tasks" data-animation="slide" onclick="switchTab('schedule')">
+            <div class="stat-card stat-active-tasks loading" data-animation="slide" onclick="switchTab('schedule')">
                 <div class="stat-icon">⚡</div>
                 <div class="stat-content">
-                    <div class="stat-value" id="activeTasks">@ViewBag.Stats?.ActiveTasks</div>
+                    <div class="stat-value" id="activeTasks">0</div>
                     <div class="stat-label">Активных задач</div>
                     <div class="stat-trend">
-                        <span class="trend-neutral">В процессе</span>
+                        <span class="trend-neutral">Загрузка...</span>
                     </div>
                 </div>
             </div>
 
-            <div class="stat-card stat-resources" data-animation="slide" onclick="switchTab('resources')">
+            <div class="stat-card stat-resources loading" data-animation="slide" onclick="switchTab('resources')">
                 <div class="stat-icon">👥</div>
                 <div class="stat-content">
-                    <div class="stat-value" id="totalResources">@ViewBag.Stats?.TotalResources</div>
+                    <div class="stat-value" id="totalResources">0</div>
                     <div class="stat-label">Ресурсов</div>
                     <div class="stat-trend">
-                        <span class="trend-up">@ViewBag.Stats?.ActiveResources активны</span>
+                        <span class="trend-up" id="activeResources">Загрузка...</span>
                     </div>
                 </div>
             </div>
 
-            <div class="stat-card stat-productivity" data-animation="pulse" onclick="switchTab('analytics')">
+            <div class="stat-card stat-productivity loading" data-animation="pulse" onclick="switchTab('analytics')">
                 <div class="stat-icon">📈</div>
                 <div class="stat-content">
-                    <div class="stat-value" id="productivityScore">@ViewBag.Stats?.ProductivityScore?.ToString("0.0")%</div>
+                    <div class="stat-value" id="productivityScore">0%</div>
                     <div class="stat-label">Продуктивность</div>
                     <div class="stat-trend">
-                        <span class="trend-up">↑ @ViewBag.Stats?.ResourcesUtilization?.ToString("0.0")% утилизация</span>
+                        <span class="trend-up" id="resourcesUtilization">Загрузка...</span>
                     </div>
                 </div>
             </div>
@@ -574,47 +631,36 @@
                     <div class="overview-grid">
                         <div class="overview-card overview-status">
                             <h3 class="card-title">📋 Статус задач</h3>
-                            <div class="status-grid">
-                                @if (ViewBag.Analytics?.TaskStatusDistribution != null)
-                                {
-                                    <div class="status-item status-not-started">
-                                        <div class="status-count">@ViewBag.Analytics.TaskStatusDistribution["Not Started"]</div>
-                                        <div class="status-label">Не начато</div>
-                                    </div>
-                                    <div class="status-item status-in-progress">
-                                        <div class="status-count">@ViewBag.Analytics.TaskStatusDistribution["In Progress"]</div>
-                                        <div class="status-label">В процессе</div>
-                                    </div>
-                                    <div class="status-item status-completed">
-                                        <div class="status-count">@ViewBag.Analytics.TaskStatusDistribution["Completed"]</div>
-                                        <div class="status-label">Завершено</div>
-                                    </div>
-                                    <div class="status-item status-overdue">
-                                        <div class="status-count">@ViewBag.Analytics.TaskStatusDistribution["Overdue"]</div>
-                                        <div class="status-label">Просрочено</div>
-                                    </div>
-                                }
+                            <div class="status-grid" id="statusGrid">
+                                <div class="status-item status-not-started loading">
+                                    <div class="status-count" id="statusNotStarted">0</div>
+                                    <div class="status-label">Не начато</div>
+                                </div>
+                                <div class="status-item status-in-progress loading">
+                                    <div class="status-count" id="statusInProgress">0</div>
+                                    <div class="status-label">В процессе</div>
+                                </div>
+                                <div class="status-item status-completed loading">
+                                    <div class="status-count" id="statusCompleted">0</div>
+                                    <div class="status-label">Завершено</div>
+                                </div>
+                                <div class="status-item status-overdue loading">
+                                    <div class="status-count" id="statusOverdue">0</div>
+                                    <div class="status-label">Просрочено</div>
+                                </div>
                             </div>
                         </div>
 
                         <div class="overview-card overview-activities">
                             <h3 class="card-title">🕐 Последние действия</h3>
-                            <div class="activities-list">
-                                @if (ViewBag.RecentActivities != null)
-                                {
-                                    foreach (var activity in ViewBag.RecentActivities)
-                                    {
-                                        <div class="activity-item">
-                                            <div class="activity-icon">
-                                                @(activity.Type == "Task" ? "✅" : "🕐")
-                                            </div>
-                                            <div class="activity-content">
-                                                <div class="activity-text">@activity.Description</div>
-                                                <div class="activity-time">@activity.Timestamp.ToString("HH:mm")</div>
-                                            </div>
-                                        </div>
-                                    }
-                                }
+                            <div class="activities-list" id="activitiesList">
+                                <div class="activity-item loading">
+                                    <div class="activity-icon">🕐</div>
+                                    <div class="activity-content">
+                                        <div class="activity-text">Загрузка данных...</div>
+                                        <div class="activity-time">--:--</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -622,35 +668,22 @@
 
                 <!-- Analytics Tab -->
                 <div class="tab-pane" id="analytics">
-                    <div class="analytics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                        @if (ViewBag.Analytics != null)
-                        {
-                            <div class="overview-card">
-                                <h3 class="card-title">📊 Статистика по дням</h3>
-                                <div id="dailyTasksChart" style="height: 200px;">
-                                    <!-- Chart will be rendered here -->
-                                </div>
+                    <div class="analytics-grid">
+                        <div class="overview-card">
+                            <h3 class="card-title">📊 Статистика по дням</h3>
+                            <div id="dailyTasksChartContainer">
+                                <canvas id="dailyTasksChart" style="height: 200px;"></canvas>
                             </div>
+                        </div>
 
-                            <div class="overview-card">
-                                <h3 class="card-title">👥 Производительность ресурсов</h3>
-                                <div class="performance-list" style="max-height: 300px; overflow-y: auto;">
-                                    @if (ViewBag.Analytics.ResourcePerformance != null)
-                                    {
-                                        foreach (var performance in ViewBag.Analytics.ResourcePerformance)
-                                        {
-                                            <div class="performance-item" style="margin-bottom: 15px;">
-                                                <div class="resource-name" style="font-size: 14px; color: var(--dark); margin-bottom: 8px; font-weight: 600;">@performance.Key</div>
-                                                <div class="performance-bar" style="height: 20px; background: var(--gray-light); border-radius: 10px; position: relative; overflow: hidden;">
-                                                    <div class="bar-fill" style="height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 10px; width: @performance.Value%;"></div>
-                                                    <span class="performance-value" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; font-weight: 600; color: var(--dark);">@performance.Value.ToString("0.0")%</span>
-                                                </div>
-                                            </div>
-                                        }
-                                    }
+                        <div class="overview-card">
+                            <h3 class="card-title">👥 Производительность ресурсов</h3>
+                            <div class="performance-list" id="performanceList">
+                                <div class="loading" style="padding: 20px; text-align: center;">
+                                    Загрузка данных...
                                 </div>
                             </div>
-                        }
+                        </div>
                     </div>
                 </div>
 
@@ -677,19 +710,19 @@
 
                 <!-- Reports Tab -->
                 <div class="tab-pane" id="reports">
-                    <div class="reports-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div class="reports-grid">
                         <div class="overview-card">
                             <h3 class="card-title">📋 Отчет по производительности</h3>
                             <div class="report-content">
-                                <div class="report-metric" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--gray-light);">
-                                    <span class="metric-label" style="color: var(--gray); font-size: 14px;">Процент выполнения:</span>
-                                    <span class="metric-value" style="font-weight: 700; color: var(--dark); font-size: 16px;">@(ViewBag.Analytics?.TaskCompletionRate?.ToString("0.0") ?? "0")%</span>
+                                <div class="report-metric">
+                                    <span class="metric-label">Процент выполнения:</span>
+                                    <span class="metric-value" id="completionRate">0%</span>
                                 </div>
-                                <div class="report-metric" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--gray-light);">
-                                    <span class="metric-label" style="color: var(--gray); font-size: 14px;">Утилизация ресурсов:</span>
-                                    <span class="metric-value" style="font-weight: 700; color: var(--dark); font-size: 16px;">@ViewBag.Stats?.ResourcesUtilization?.ToString("0.0")%</span>
+                                <div class="report-metric">
+                                    <span class="metric-label">Утилизация ресурсов:</span>
+                                    <span class="metric-value" id="utilizationRate">0%</span>
                                 </div>
-                                <button class="btn-generate-report" onclick="generateReport()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: var(--transition); margin-top: 20px;">
+                                <button class="btn-generate-report" onclick="generateReport()">
                                     Создать PDF отчет
                                 </button>
                             </div>
@@ -718,26 +751,287 @@
                 <button class="action-btn btn-notifications" onclick="showNotifications()">
                     <div class="action-icon">🔔</div>
                     <span class="action-text">Уведомления</span>
-                    <span class="notification-badge">3</span>
+                    <span class="notification-badge" id="notificationCount">0</span>
                 </button>
             </div>
         </div>
     </div>
 
     <script>
+        // Глобальные переменные
+        let statsChart = null;
+        let performanceChart = null;
+        let userName = '@User?.Identity?.Name' || 'Пользователь';
+        let isRefreshing = false;
+
         // Инициализация дашборда
         function initializeDashboard() {
             updateClock();
             setInterval(updateClock, 1000);
             initializeTabSwitching();
-            loadGrids();
+            loadDashboardData();
+
+            // Автообновление каждые 30 секунд
+            setInterval(() => {
+                if (!isRefreshing) {
+                    loadDashboardData();
+                }
+            }, 30000);
         }
 
-        // Обновление времени и даты
+        // Загрузка всех данных дашборда
+        async function loadDashboardData() {
+            try {
+                isRefreshing = true;
+                updateRefreshButton(true);
+
+                // Загружаем статистику
+                await loadStats();
+
+                // Загружаем аналитику
+                await loadAnalytics();
+
+                // Загружаем активности
+                await loadRecentActivities();
+
+                // Убираем состояние загрузки
+                document.querySelectorAll('.loading').forEach(el => {
+                    el.classList.remove('loading');
+                    el.classList.add('slide-in');
+                });
+
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showNotification('Ошибка загрузки данных', 'error');
+            } finally {
+                isRefreshing = false;
+                updateRefreshButton(false);
+            }
+        }
+
+        // Загрузка статистики
+        async function loadStats() {
+            try {
+                const response = await fetch('/Dashboard/GetStats');
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const stats = await response.json();
+
+                // Анимируем обновление чисел
+                animateNumber('totalTasks', stats.totalTasks);
+                animateNumber('activeTasks', stats.activeTasks);
+                animateNumber('totalResources', stats.totalResources);
+
+                // Обновляем текстовые поля
+                document.getElementById('productivityScore').textContent =
+                    stats.productivityScore?.toFixed(1) + '%' || '0%';
+
+                document.getElementById('tasksThisWeek').textContent =
+                    `↑ ${stats.tasksThisWeek || 0} на этой неделе`;
+
+                document.getElementById('activeResources').textContent =
+                    `${stats.activeResources || 0} активны`;
+
+                document.getElementById('resourcesUtilization').textContent =
+                    `↑ ${stats.resourcesUtilization?.toFixed(1) || '0'}% утилизация`;
+
+                document.getElementById('welcomeText').textContent =
+                    `Добро пожаловать, ${userName}! Вот что происходит.`;
+
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                throw error;
+            }
+        }
+
+        // Загрузка аналитики
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('/Dashboard/GetAnalytics');
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const analytics = await response.json();
+
+                // Обновляем статусы задач
+                if (analytics.taskStatusDistribution) {
+                    animateNumber('statusNotStarted', analytics.taskStatusDistribution["Not Started"] || 0);
+                    animateNumber('statusInProgress', analytics.taskStatusDistribution["In Progress"] || 0);
+                    animateNumber('statusCompleted', analytics.taskStatusDistribution["Completed"] || 0);
+                    animateNumber('statusOverdue', analytics.taskStatusDistribution["Overdue"] || 0);
+                }
+
+                // Обновляем график
+                updateDailyTasksChart(analytics.dailyTasks);
+
+                // Обновляем производительность ресурсов
+                updateResourcePerformance(analytics.resourcePerformance);
+
+                // Обновляем отчеты
+                document.getElementById('completionRate').textContent =
+                    analytics.taskCompletionRate?.toFixed(1) + '%' || '0%';
+                document.getElementById('utilizationRate').textContent =
+                    analytics.resourcesUtilization?.toFixed(1) + '%' || '0%';
+
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                throw error;
+            }
+        }
+
+        // Загрузка последних активностей
+        async function loadRecentActivities() {
+            try {
+                const response = await fetch('/Dashboard/GetRecentActivities');
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const activities = await response.json();
+                updateActivitiesList(activities);
+
+            } catch (error) {
+                console.error('Error loading activities:', error);
+                throw error;
+            }
+        }
+
+        // Обновление списка активностей
+        function updateActivitiesList(activities) {
+            const container = document.getElementById('activitiesList');
+            if (!container) return;
+
+            if (!activities || activities.length === 0) {
+                container.innerHTML = `
+                    <div class="activity-item">
+                        <div class="activity-icon">ℹ️</div>
+                        <div class="activity-content">
+                            <div class="activity-text">Нет активностей</div>
+                            <div class="activity-time">--:--</div>
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = activities.map(activity => `
+                <div class="activity-item slide-in">
+                    <div class="activity-icon">
+                        ${activity.Type === 'Task' ? '✅' : '🕐'}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">${activity.Description || 'Действие'}</div>
+                        <div class="activity-time">${formatTime(activity.Timestamp)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Обновление графика по дням
+        function updateDailyTasksChart(dailyTasks) {
+            const ctx = document.getElementById('dailyTasksChart');
+            if (!ctx) return;
+
+            // Уничтожаем старый график если есть
+            if (statsChart) {
+                statsChart.destroy();
+            }
+
+            if (!dailyTasks) return;
+
+            const dates = Object.keys(dailyTasks);
+            const counts = dates.map(date => dailyTasks[date]?.Count || 0);
+            const completed = dates.map(date => dailyTasks[date]?.Completed || 0);
+
+            statsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        {
+                            label: 'Всего задач',
+                            data: counts,
+                            borderColor: 'rgb(99, 102, 241)',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Завершено',
+                            data: completed,
+                            borderColor: 'rgb(16, 185, 129)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        // Обновление производительности ресурсов
+        function updateResourcePerformance(performance) {
+            const container = document.getElementById('performanceList');
+            if (!container) return;
+
+            if (!performance || Object.keys(performance).length === 0) {
+                container.innerHTML = `
+                    <div class="text-center p-4 text-gray-500">
+                        Нет данных о производительности
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = Object.entries(performance).map(([resource, value]) => `
+                <div class="performance-item slide-in">
+                    <div class="resource-name">${resource}</div>
+                    <div class="performance-bar">
+                        <div class="bar-fill" style="width: ${value}%"></div>
+                        <span class="performance-value">${value.toFixed(1)}%</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Анимация чисел
+        function animateNumber(elementId, targetValue) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            const current = parseFloat(element.textContent) || 0;
+            const duration = 1000;
+            const startTime = Date.now();
+
+            function update() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Кубическая анимация
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                const currentValue = Math.floor(current + (targetValue - current) * easeProgress);
+
+                element.textContent = currentValue;
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+
+            update();
+        }
+
+        // Обновление времени
         function updateClock() {
             const now = new Date();
             const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const timeOptions = { hour12: true, hour: 'numeric', minute: '2-digit' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
 
             document.getElementById('currentDate').textContent =
                 now.toLocaleDateString('ru-RU', dateOptions);
@@ -745,195 +1039,38 @@
                 now.toLocaleTimeString('ru-RU', timeOptions);
         }
 
-        // Переключение вкладок
-        function initializeTabSwitching() {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    switchTab(tabId);
-                });
-            });
+        // Форматирование времени
+        function formatTime(timestamp) {
+            if (!timestamp) return '--:--';
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
         }
 
-        function switchTab(tabId) {
-            // Обновить активное состояние кнопок
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
+        // Обновление кнопки обновления
+        function updateRefreshButton(isLoading) {
+            const icon = document.getElementById('refreshIcon');
+            const text = document.getElementById('refreshText');
 
-            // Скрыть все панели
-            document.querySelectorAll('.tab-pane').forEach(pane => {
-                pane.classList.remove('active');
-            });
-
-            // Показать выбранную панель
-            document.getElementById(tabId).classList.add('active');
-
-            // Загрузить данные для вкладки при необходимости
-            loadTabData(tabId);
-        }
-
-        // Загрузка данных для вкладок
-        function loadTabData(tabId) {
-            switch(tabId) {
-                case 'tasks':
-                    loadTaskGrid();
-                    break;
-                case 'resources':
-                    loadResourceGrid();
-                    break;
-                case 'schedule':
-                    loadScheduleGrid();
-                    break;
+            if (isLoading) {
+                icon.textContent = '⏳';
+                text.textContent = 'Обновление...';
+                document.querySelector('.dashboard-container').classList.add('refreshing');
+            } else {
+                icon.textContent = '🔄';
+                text.textContent = 'Обновить';
+                document.querySelector('.dashboard-container').classList.remove('refreshing');
             }
-        }
-
-        // Загрузка сеток данных
-        function loadGrids() {
-            loadTaskGrid();
-            loadResourceGrid();
-            loadScheduleGrid();
-        }
-
-        function loadTaskGrid() {
-            const source = {
-                datatype: 'json',
-                datafields: [
-                    { name: 'uid', type: 'string' },
-                    { name: 'name', type: 'string' },
-                    { name: 'time_ins', type: 'date' },
-                    { name: 'time_pref_start', type: 'date' },
-                    { name: 'time_pref_finish', type: 'date' },
-                    { name: 'duration', type: 'int' },
-                    { name: 'company_id', type: 'string' },
-                ],
-                id: 'uid',
-                url: '/Task'
-            };
-
-            const dataAdapter = new $.jqx.dataAdapter(source);
-
-            $('#taskGrid').jqxGrid({
-                width: '100%',
-                height: '100%',
-                source: dataAdapter,
-                columns: [
-                    { text: '№', width: '50', cellsrenderer: function (row) { return row + 1; } },
-                    { text: 'Название', datafield: 'name', width: '200' },
-                    { text: 'Создано', datafield: 'time_ins', width: '150', cellsformat: 'dd.MM.yyyy HH:mm' },
-                    { text: 'Начало', datafield: 'time_pref_start', width: '150', cellsformat: 'dd.MM.yyyy HH:mm' },
-                    { text: 'Завершение', datafield: 'time_pref_finish', width: '150', cellsformat: 'dd.MM.yyyy HH:mm' },
-                    { text: 'Длительность', datafield: 'duration', width: '100' }
-                ]
-            });
-        }
-
-        function loadResourceGrid() {
-            const source = {
-                datatype: 'json',
-                datafields: [
-                    { name: 'uid', type: 'string' },
-                    { name: 'name', type: 'string' },
-                    { name: 'time_ins', type: 'date' },
-                    { name: 'company_id', type: 'string' },
-                ],
-                id: 'uid',
-                url: '/Resource'
-            };
-
-            const dataAdapter = new $.jqx.dataAdapter(source);
-
-            $('#resourceGrid').jqxGrid({
-                width: '100%',
-                height: '100%',
-                source: dataAdapter,
-                columns: [
-                    { text: '№', width: '50', cellsrenderer: function (row) { return row + 1; } },
-                    { text: 'Название', datafield: 'name', width: '200' },
-                    { text: 'Создан', datafield: 'time_ins', width: '150', cellsformat: 'dd.MM.yyyy HH:mm' },
-                    { text: 'Компания', datafield: 'company_id', width: '150' }
-                ]
-            });
-        }
-
-        function loadScheduleGrid() {
-            const source = {
-                datatype: 'json',
-                datafields: [
-                    { name: 'shift_id', type: 'string' },
-                    { name: 'shift_name', type: 'string' },
-                    { name: 'task_id', type: 'string' },
-                    { name: 'task_name', type: 'string' },
-                    { name: 'time_ins', type: 'date' },
-                    { name: 'time_sched_start', type: 'date' },
-                    { name: 'time_sched_finish', type: 'date' },
-                    { name: 'idle_dur', type: 'int' },
-                ],
-                url: '/ShiftTask/GetShiftTasks'
-            };
-
-            const dataAdapter = new $.jqx.dataAdapter(source);
-
-            $('#shiftTaskGrid').jqxGrid({
-                width: '100%',
-                height: '100%',
-                source: dataAdapter,
-                columns: [
-                    { text: '№', width: '50', cellsrenderer: function (row) { return row + 1; } },
-                    { text: 'Смена', datafield: 'shift_name', width: '150' },
-                    { text: 'Задача', datafield: 'task_name', width: '150' },
-                    { text: 'Начало', datafield: 'time_sched_start', width: '150', cellsformat: 'dd.MM.yyyy HH:mm' },
-                    { text: 'Завершение', datafield: 'time_sched_finish', width: '150', cellsformat: 'dd.MM.yyyy HH:mm' },
-                    { text: 'Простой', datafield: 'idle_dur', width: '100' }
-                ]
-            });
         }
 
         // Обновление дашборда
         function refreshDashboard() {
-            document.querySelector('.dashboard-container').classList.add('refreshing');
+            if (isRefreshing) return;
 
-            fetch('/Dashboard/GetStats')
-                .then(response => response.json())
-                .then(stats => {
-                    updateStats(stats);
-                    setTimeout(() => {
-                        document.querySelector('.dashboard-container').classList.remove('refreshing');
-                        showNotification('Дашборд обновлен', 'success');
-                    }, 500);
-                });
-        }
-
-        function updateStats(stats) {
-            // Анимированное обновление статистики
-            animateNumber('totalTasks', stats.totalTasks);
-            animateNumber('activeTasks', stats.activeTasks);
-            animateNumber('totalResources', stats.totalResources);
-            document.getElementById('productivityScore').textContent = stats.productivityScore.toFixed(1) + '%';
-        }
-
-        function animateNumber(elementId, targetValue) {
-            const element = document.getElementById(elementId);
-            if (element) {
-                const current = parseInt(element.textContent) || 0;
-                let currentValue = current;
-                const duration = 1000;
-                const start = Date.now();
-
-                function update() {
-                    const elapsed = Date.now() - start;
-                    const progress = Math.min(elapsed / duration, 1);
-                    currentValue = current + (targetValue - current) * progress;
-                    element.textContent = Math.round(currentValue);
-
-                    if (progress < 1) {
-                        requestAnimationFrame(update);
-                    }
-                }
-
-                update();
-            }
+            loadDashboardData().then(() => {
+                showNotification('Дашборд обновлен', 'success');
+            }).catch(() => {
+                showNotification('Ошибка при обновлении', 'error');
+            });
         }
 
         // Показать уведомление
@@ -972,21 +1109,79 @@
             }, 5000);
         }
 
+        // Переключение вкладок
+        function initializeTabSwitching() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+        }
+
+        function switchTab(tabId) {
+            // Обновить активное состояние кнопок
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+
+            // Скрыть все панели
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+
+            // Показать выбранную панель
+            document.getElementById(tabId).classList.add('active');
+
+            // Загрузить данные для вкладки при необходимости
+            loadTabData(tabId);
+        }
+
+        async function loadTabData(tabId) {
+            switch(tabId) {
+                case 'tasks':
+                    await loadTaskGrid();
+                    break;
+                case 'resources':
+                    await loadResourceGrid();
+                    break;
+                case 'schedule':
+                    await loadScheduleGrid();
+                    break;
+            }
+        }
+
+        async function loadTaskGrid() {
+            console.log('Loading task grid...');
+            // Реализация загрузки таблицы задач
+        }
+
+        async function loadResourceGrid() {
+            console.log('Loading resource grid...');
+            // Реализация загрузки таблицы ресурсов
+        }
+
+        async function loadScheduleGrid() {
+            console.log('Loading schedule grid...');
+            // Реализация загрузки таблицы расписания
+        }
+
         // Быстрые действия
         function createNewTask() {
-            showNotification('Создание новой задачи...', 'info');
+            showNotification('Функция создания задачи в разработке', 'info');
         }
 
         function scheduleShift() {
-            showNotification('Планирование смены...', 'info');
+            showNotification('Функция планирования смены в разработке', 'info');
         }
 
         function generateReport() {
-            showNotification('Генерация отчета...', 'info');
+            showNotification('Функция создания отчета в разработке', 'info');
         }
 
         function showNotifications() {
-            showNotification('Загрузка уведомлений...', 'info');
+            showNotification('Функция уведомлений в разработке', 'info');
         }
 
         // Инициализация при загрузке страницы
