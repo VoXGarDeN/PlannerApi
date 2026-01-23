@@ -1,38 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PlannerApi.Models
 {
-    public class DbContext
+    public class resource
     {
-        private readonly ConnectToDb _db;
+        public Guid uid { get; set; }
+        public string name { get; set; } = "";
+        public DateTime time_ins { get; set; }
+        public Guid company_id { get; set; }
+    }
 
-        public DbContext()
-        {
-            _db = new ConnectToDb();
-        }
+    public class task
+    {
+        public Guid uid { get; set; }
+        public string name { get; set; } = "";
+        public DateTime time_ins { get; set; }
+        public DateTime time_pref_start { get; set; }
+        public DateTime time_pref_finish { get; set; }
+        public int duration { get; set; }
+        public Guid company_id { get; set; }
+    }
 
-        public async Task<List<task>> GetTasksAsync()
-        {
-            return await Task.FromResult(_db.GetTasks().ToList());
-        }
+    public class shift
+    {
+        public Guid uid { get; set; }
+        public string name { get; set; } = "";
+        public DateTime time_ins { get; set; }
+        public Guid resource_id { get; set; }
+        public DateTime time_start { get; set; }
+        public DateTime time_finish { get; set; }
+        public DateTime? time_free { get; set; }
+    }
 
-        public async Task<List<resource>> GetResourcesAsync()
-        {
-            return await Task.FromResult(_db.GetResources().ToList());
-        }
-
-        public async Task<List<shift>> GetShiftsAsync()
-        {
-            return await Task.FromResult(_db.GetShifts().ToList());
-        }
-
-        public async Task<List<shift_task>> GetShiftTasksAsync()
-        {
-            return await Task.FromResult(_db.GetShiftTasks().ToList());
-        }
+    public class shift_task
+    {
+        public Guid shift_id { get; set; }
+        public string shift_name { get; set; } = "";
+        public Guid task_id { get; set; }
+        public string task_name { get; set; } = "";
+        public DateTime time_ins { get; set; }
+        public DateTime? time_sched_start { get; set; }
+        public DateTime? time_sched_finish { get; set; }
+        public int? idle_dur { get; set; }
     }
 
     public class DashboardStats
@@ -72,17 +82,5 @@ namespace PlannerApi.Models
         public string Description { get; set; } = "";
         public DateTime Timestamp { get; set; }
         public string User { get; set; } = "";
-    }
-
-    public class DashboardManager
-    {
-        private readonly DbContext _dbContext;
-
-        public DashboardManager(DbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
-
-        // Методы для работы с дашбордом
     }
 }

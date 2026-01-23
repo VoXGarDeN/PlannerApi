@@ -1,20 +1,19 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace PlannerApi.Controllers;
-
-[ApiController]
-[Authorize]
-[Route("[controller]")]
-[ApiExplorerSettings(IgnoreApi = true)] 
-public class HomeController : ControllerBase
+namespace PlannerApi.Controllers
 {
-    private ConnectToDb _db;
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(ILogger<HomeController> logger)
+    [ApiController]
+    [Route("[controller]")]
+    [Authorize]
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public class HomeController : ControllerBase
     {
-        _logger = logger;
-        _db = new ConnectToDb();
+        private readonly ILogger<HomeController> _logger;
+
+        public HomeController(ILogger<HomeController> logger)
+        {
+            _logger = logger;
+        }
     }
 }

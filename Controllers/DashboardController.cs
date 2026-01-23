@@ -1,24 +1,19 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PlannerApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace PlannerApi.Controllers
 {
     [Authorize]
-    [Route("[controller]")]
     public class DashboardController : Controller
     {
         private readonly ILogger<DashboardController> _logger;
-        private readonly ConnectToDb _db;
 
         public DashboardController(ILogger<DashboardController> logger)
         {
             _logger = logger;
-            _db = new ConnectToDb();
         }
 
         [HttpGet]
@@ -26,9 +21,10 @@ namespace PlannerApi.Controllers
         [Route("/")]
         public IActionResult Index()
         {
-            var stats = GetDashboardStats();
-            var analytics = GetAnalyticsData();
-            var recentActivities = GetRecentActivities();
+            using var db = new Models.ConnectToDb();
+            var stats = GetDashboardStats(db);
+            var analytics = GetAnalyticsData(db);
+            var recentActivities = GetRecentActivities(db);
 
             ViewBag.Stats = stats;
             ViewBag.Analytics = analytics;
@@ -41,37 +37,40 @@ namespace PlannerApi.Controllers
         [HttpGet("GetStats")]
         public IActionResult GetStats()
         {
-            var stats = GetDashboardStats();
+            using var db = new Models.ConnectToDb();
+            var stats = GetDashboardStats(db);
             return Json(stats);
         }
 
         [HttpGet("GetAnalytics")]
         public IActionResult GetAnalytics()
         {
-            var analytics = GetAnalyticsData();
+            using var db = new Models.ConnectToDb();
+            var analytics = GetAnalyticsData(db);
             return Json(analytics);
         }
 
         [HttpGet("GetRecentActivities")]
-        public IActionResult GetRecentActivities()
+        public IActionResult GetRecentActivitiesApi()
         {
-            var activities = GetRecentActivities();
+            using var db = new Models.ConnectToDb();
+            var activities = GetRecentActivities(db);
             return Json(activities);
         }
 
-        private DashboardStats GetDashboardStats()
+        private Models.DashboardStats GetDashboardStats(Models.ConnectToDb db)
         {
             try
             {
-                var tasks = _db.GetTasks().ToList();
-                var resources = _db.GetResources().ToList();
-                var shifts = _db.GetShifts().ToList();
-                var shiftTasks = _db.GetShiftTasks().ToList();
+                var tasks = db.GetTasks().ToList();
+                var resources = db.GetResources().ToList();
+                var shifts = db.GetShifts().ToList();
+                var shiftTasks = db.GetShiftTasks().ToList();
 
                 var now = DateTime.UtcNow;
                 var weekAgo = now.AddDays(-7);
 
-                return new DashboardStats
+                return new Models.DashboardStats
                 {
                     TotalTasks = tasks.Count,
                     ActiveTasks = tasks.Count(t => t.time_pref_start <= now && t.time_pref_finish >= now),
@@ -90,34 +89,34 @@ namespace PlannerApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting dashboard stats");
-                return new DashboardStats();
+                return new Models.DashboardStats();
             }
         }
 
-        private AnalyticsData GetAnalyticsData()
+        private Models.AnalyticsData GetAnalyticsData(Models.ConnectToDb db)
         {
             try
             {
-                var tasks = _db.GetTasks().ToList();
-                var shifts = _db.GetShifts().ToList();
-                var shiftTasks = _db.GetShiftTasks().ToList();
+                var tasks = db.GetTasks().ToList();
+                var shifts = db.GetShifts().ToList();
+                var shiftTasks = db.GetShiftTasks().ToList();
 
                 var last30Days = Enumerable.Range(0, 30)
                     .Select(i => DateTime.UtcNow.Date.AddDays(-i))
                     .Reverse()
                     .ToList();
 
-                var dailyTasks = new Dictionary<string, DailyTaskData>();
+                var dailyTasks = new Dictionary<string, Models.DailyTaskData>();
                 foreach (var date in last30Days)
                 {
                     var count = tasks.Count(t => t.time_ins.Date == date);
                     var completed = tasks.Count(t => t.time_pref_finish.Date == date && t.time_pref_finish < DateTime.UtcNow);
-                    dailyTasks[date.ToString("MM/dd")] = new DailyTaskData { Count = count, Completed = completed };
+                    dailyTasks[date.ToString("MM/dd")] = new Models.DailyTaskData { Count = count, Completed = completed };
                 }
 
-                var resourcePerformance = CalculateResourcePerformance();
+                var resourcePerformance = CalculateResourcePerformance(db);
 
-                return new AnalyticsData
+                return new Models.AnalyticsData
                 {
                     DailyTasks = dailyTasks,
                     TaskStatusDistribution = new Dictionary<string, int>
@@ -136,21 +135,20 @@ namespace PlannerApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting analytics data");
-                return new AnalyticsData();
+                return new Models.AnalyticsData();
             }
         }
 
-        private List<Activity> GetRecentActivities()
+        private List<Models.Activity> GetRecentActivities(Models.ConnectToDb db)
         {
             try
             {
-                var activities = new List<Activity>();
+                var activities = new List<Models.Activity>();
 
-                // Get recent tasks
-                var recentTasks = _db.GetTasks()
+                var recentTasks = db.GetTasks()
                     .OrderByDescending(t => t.time_ins)
                     .Take(5)
-                    .Select(t => new Activity
+                    .Select(t => new Models.Activity
                     {
                         Id = t.uid.ToString(),
                         Type = "Task",
@@ -159,11 +157,10 @@ namespace PlannerApi.Controllers
                         User = "System"
                     });
 
-                // Get recent shifts
-                var recentShifts = _db.GetShifts()
+                var recentShifts = db.GetShifts()
                     .OrderByDescending(s => s.time_ins)
                     .Take(5)
-                    .Select(s => new Activity
+                    .Select(s => new Models.Activity
                     {
                         Id = s.uid.ToString(),
                         Type = "Shift",
@@ -183,11 +180,11 @@ namespace PlannerApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting recent activities");
-                return new List<Activity>();
+                return new List<Models.Activity>();
             }
         }
 
-        private float CalculateProductivityScore(List<task> tasks, List<shift_task> shiftTasks)
+        private float CalculateProductivityScore(List<Models.task> tasks, List<Models.shift_task> shiftTasks)
         {
             if (tasks.Count == 0) return 0;
 
@@ -198,7 +195,7 @@ namespace PlannerApi.Controllers
                    (float)scheduledTasks / tasks.Count * 100) / 2;
         }
 
-        private float CalculateUtilization(List<resource> resources, List<shift> shifts, List<shift_task> shiftTasks)
+        private float CalculateUtilization(List<Models.resource> resources, List<Models.shift> shifts, List<Models.shift_task> shiftTasks)
         {
             if (resources.Count == 0) return 0;
 
@@ -209,12 +206,12 @@ namespace PlannerApi.Controllers
             return (float)utilizedResources / resources.Count * 100;
         }
 
-        private Dictionary<string, float> CalculateResourcePerformance()
+        private Dictionary<string, float> CalculateResourcePerformance(Models.ConnectToDb db)
         {
-            var resources = _db.GetResources().ToList();
-            var shifts = _db.GetShifts().ToList();
-            var tasks = _db.GetTasks().ToList();
-            var shiftTasks = _db.GetShiftTasks().ToList();
+            var resources = db.GetResources().ToList();
+            var shifts = db.GetShifts().ToList();
+            var tasks = db.GetTasks().ToList();
+            var shiftTasks = db.GetShiftTasks().ToList();
 
             var performance = new Dictionary<string, float>();
 
@@ -232,7 +229,7 @@ namespace PlannerApi.Controllers
                 }
 
                 var totalDuration = resourceTasks.Sum(st =>
-                    (st.time_sched_finish - st.time_sched_start).TotalHours);
+                    (st.time_sched_finish - st.time_sched_start).GetValueOrDefault().TotalHours);
                 var idleTime = resourceTasks.Sum(st => st.idle_dur ?? 0) / 60.0;
 
                 performance[resource.name] = totalDuration > 0 ?
@@ -242,7 +239,7 @@ namespace PlannerApi.Controllers
             return performance;
         }
 
-        private Dictionary<int, int> CalculatePeakHours(List<shift> shifts)
+        private Dictionary<int, int> CalculatePeakHours(List<Models.shift> shifts)
         {
             var hourlyCounts = new Dictionary<int, int>();
 
@@ -255,7 +252,7 @@ namespace PlannerApi.Controllers
             return hourlyCounts;
         }
 
-        private float CalculateCompletionRate(List<task> tasks, List<shift_task> shiftTasks)
+        private float CalculateCompletionRate(List<Models.task> tasks, List<Models.shift_task> shiftTasks)
         {
             if (tasks.Count == 0) return 0;
 

@@ -1,387 +1,996 @@
 ﻿@{
     ViewData["Title"] = "Dashboard";
-    Layout = "_Layout";
+    Layout = null;
 }
 
-<div class="dashboard-container">
-    <!-- Header -->
-    <div class="dashboard-header">
-        <div class="header-left">
-            <h1 class="dashboard-title">📊 Planner Dashboard</h1>
-            <p class="dashboard-subtitle">Welcome back, @ViewBag.UserName! Here's what's happening.</p>
-        </div>
-        <div class="header-right">
-            <div class="date-time">
-                <span id="currentDate"></span>
-                <span id="currentTime"></span>
-            </div>
-            <button class="btn-refresh" onclick="refreshDashboard()">
-                <i class="refresh-icon">🔄</i> Refresh
-            </button>
-        </div>
-    </div>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Planner Dashboard</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://jqwidgets.com/public/jqwidgets/styles/jqx.base.css">
+    <script src="https://jqwidgets.com/public/jqwidgets/jqx-all.js"></script>
+    <style>
+        /* Ваш CSS код остается здесь без изменений */
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #9ca3af;
+            --gray-light: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-    <!-- Quick Stats -->
-    <div class="quick-stats">
-        <div class="stat-card stat-total-tasks" data-animation="pulse">
-            <div class="stat-icon">📋</div>
-            <div class="stat-content">
-                <div class="stat-value" id="totalTasks">@ViewBag.Stats.TotalTasks</div>
-                <div class="stat-label">Total Tasks</div>
-                <div class="stat-trend">
-                    <span class="trend-up">↑ @ViewBag.Stats.TasksThisWeek this week</span>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-left h1 {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .header-left p {
+            color: var(--gray);
+            font-size: 16px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .date-time {
+            text-align: right;
+        }
+
+        #currentDate {
+            display: block;
+            font-size: 16px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        #currentTime {
+            display: block;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn-refresh {
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            font-size: 16px;
+        }
+
+            .btn-refresh:hover {
+                background: var(--primary-dark);
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-lg);
+            }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            border-left: 4px solid var(--primary);
+        }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: var(--shadow-lg);
+            }
+
+        .stat-icon {
+            font-size: 36px;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            color: white;
+        }
+
+        .stat-total-tasks .stat-icon {
+            background: linear-gradient(135deg, #10b981, #34d399);
+        }
+
+        .stat-active-tasks .stat-icon {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        }
+
+        .stat-resources .stat-icon {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        }
+
+        .stat-productivity .stat-icon {
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+
+        .stat-trend {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .trend-up {
+            color: var(--success);
+        }
+
+        .trend-down {
+            color: var(--danger);
+        }
+
+        .trend-neutral {
+            color: var(--gray);
+        }
+
+        .main-tabs {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 30px;
+        }
+
+        .tabs-header {
+            display: flex;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 0;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 18px 28px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+            position: relative;
+            font-size: 16px;
+            white-space: nowrap;
+        }
+
+            .tab-btn:hover {
+                color: white;
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            .tab-btn.active {
+                color: white;
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+                .tab-btn.active::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 3px;
+                    background: white;
+                }
+
+        .tabs-content {
+            padding: 30px;
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+            .tab-pane.active {
+                display: block;
+            }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 25px;
+        }
+
+        .overview-card {
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 25px;
+            border: 1px solid var(--gray-light);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .status-item {
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+            .status-item:hover {
+                transform: scale(1.05);
+            }
+
+        .status-not-started {
+            background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+            color: var(--dark);
+        }
+
+        .status-in-progress {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+        }
+
+        .status-overdue {
+            background: linear-gradient(135deg, #fee2e2, #fca5a5);
+            color: #991b1b;
+        }
+
+        .status-count {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .status-label {
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .activities-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid var(--gray-light);
+            transition: var(--transition);
+        }
+
+            .activity-item:hover {
+                background: rgba(99, 102, 241, 0.05);
+                border-radius: 8px;
+            }
+
+        .activity-icon {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            font-size: 20px;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .actions-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .action-btn {
+            padding: 25px;
+            background: var(--light);
+            border: 2px dashed var(--gray-light);
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+            .action-btn:hover {
+                background: white;
+                border-color: var(--primary);
+                transform: translateY(-3px);
+                box-shadow: var(--shadow-lg);
+            }
+
+        .action-icon {
+            font-size: 40px;
+            color: var(--primary);
+        }
+
+        .action-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--danger);
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @@media (max-width: 768px) {
+            .overview-grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+            }
+
+            .tabs-header {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header-left h1 {
+                font-size: 24px;
+            }
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="header-left">
+                <h1>📊 Planner Dashboard</h1>
+                <p>Добро пожаловать, @ViewBag.UserName! Вот что происходит.</p>
+            </div>
+            <div class="header-right">
+                <div class="date-time">
+                    <span id="currentDate"></span>
+                    <span id="currentTime"></span>
                 </div>
+                <button class="btn-refresh" onclick="refreshDashboard()">
+                    <span>🔄</span> Обновить
+                </button>
             </div>
         </div>
 
-        <div class="stat-card stat-active-tasks" data-animation="slide">
-            <div class="stat-icon">⚡</div>
-            <div class="stat-content">
-                <div class="stat-value" id="activeTasks">@ViewBag.Stats.ActiveTasks</div>
-                <div class="stat-label">Active Tasks</div>
-                <div class="stat-trend">
-                    <span class="trend-neutral">In progress</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="stat-card stat-resources" data-animation="slide">
-            <div class="stat-icon">👥</div>
-            <div class="stat-content">
-                <div class="stat-value" id="totalResources">@ViewBag.Stats.TotalResources</div>
-                <div class="stat-label">Resources</div>
-                <div class="stat-trend">
-                    <span class="trend-up">@ViewBag.Stats.ActiveResources active</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="stat-card stat-productivity" data-animation="pulse">
-            <div class="stat-icon">📈</div>
-            <div class="stat-content">
-                <div class="stat-value" id="productivityScore">@ViewBag.Stats.ProductivityScore.ToString("0.0")%</div>
-                <div class="stat-label">Productivity</div>
-                <div class="stat-trend">
-                    <span class="trend-up">↑ @ViewBag.Stats.ResourcesUtilization.ToString("0.0")% utilization</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content Tabs -->
-    <div class="main-tabs">
-        <div class="tabs-header">
-            <button class="tab-btn active" data-tab="overview">
-                <i class="tab-icon">🏠</i> Overview
-            </button>
-            <button class="tab-btn" data-tab="analytics">
-                <i class="tab-icon">📈</i> Analytics
-            </button>
-            <button class="tab-btn" data-tab="tasks">
-                <i class="tab-icon">✅</i> Tasks
-            </button>
-            <button class="tab-btn" data-tab="resources">
-                <i class="tab-icon">👥</i> Resources
-            </button>
-            <button class="tab-btn" data-tab="schedule">
-                <i class="tab-icon">📅</i> Schedule
-            </button>
-            <button class="tab-btn" data-tab="reports">
-                <i class="tab-icon">📊</i> Reports
-            </button>
-        </div>
-
-        <div class="tabs-content">
-            <!-- Overview Tab -->
-            <div class="tab-pane active" id="overview">
-                <div class="overview-grid">
-                    <div class="overview-card overview-chart">
-                        <h3 class="card-title">📈 Task Completion Trend</h3>
-                        <div class="chart-container">
-                            <canvas id="completionChart"></canvas>
-                        </div>
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <div class="stat-card stat-total-tasks" data-animation="pulse" onclick="switchTab('overview')">
+                <div class="stat-icon">📋</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalTasks">@ViewBag.Stats?.TotalTasks</div>
+                    <div class="stat-label">Всего задач</div>
+                    <div class="stat-trend">
+                        <span class="trend-up">↑ @ViewBag.Stats?.TasksThisWeek на этой неделе</span>
                     </div>
+                </div>
+            </div>
 
-                    <div class="overview-card overview-status">
-                        <h3 class="card-title">📋 Task Status</h3>
-                        <div class="status-grid">
-                            <div class="status-item status-not-started">
-                                <div class="status-count">@ViewBag.Analytics.TaskStatusDistribution["Not Started"]</div>
-                                <div class="status-label">Not Started</div>
-                            </div>
-                            <div class="status-item status-in-progress">
-                                <div class="status-count">@ViewBag.Analytics.TaskStatusDistribution["In Progress"]</div>
-                                <div class="status-label">In Progress</div>
-                            </div>
-                            <div class="status-item status-completed">
-                                <div class="status-count">@ViewBag.Analytics.TaskStatusDistribution["Completed"]</div>
-                                <div class="status-label">Completed</div>
-                            </div>
-                            <div class="status-item status-overdue">
-                                <div class="status-count">@ViewBag.Analytics.TaskStatusDistribution["Overdue"]</div>
-                                <div class="status-label">Overdue</div>
-                            </div>
-                        </div>
+            <div class="stat-card stat-active-tasks" data-animation="slide" onclick="switchTab('schedule')">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="activeTasks">@ViewBag.Stats?.ActiveTasks</div>
+                    <div class="stat-label">Активных задач</div>
+                    <div class="stat-trend">
+                        <span class="trend-neutral">В процессе</span>
                     </div>
+                </div>
+            </div>
 
-                    <div class="overview-card overview-activities">
-                        <h3 class="card-title">🕐 Recent Activities</h3>
-                        <div class="activities-list">
-                            @foreach (var activity in ViewBag.RecentActivities)
-                            {
-                                <div class="activity-item">
-                                    <div class="activity-icon">
-                                        @(activity.Type == "Task" ? "✅" : "🕐")
+            <div class="stat-card stat-resources" data-animation="slide" onclick="switchTab('resources')">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalResources">@ViewBag.Stats?.TotalResources</div>
+                    <div class="stat-label">Ресурсов</div>
+                    <div class="stat-trend">
+                        <span class="trend-up">@ViewBag.Stats?.ActiveResources активны</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card stat-productivity" data-animation="pulse" onclick="switchTab('analytics')">
+                <div class="stat-icon">📈</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="productivityScore">@ViewBag.Stats?.ProductivityScore?.ToString("0.0")%</div>
+                    <div class="stat-label">Продуктивность</div>
+                    <div class="stat-trend">
+                        <span class="trend-up">↑ @ViewBag.Stats?.ResourcesUtilization?.ToString("0.0")% утилизация</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Tabs -->
+        <div class="main-tabs">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="overview">
+                    <span>🏠</span> Обзор
+                </button>
+                <button class="tab-btn" data-tab="analytics">
+                    <span>📈</span> Аналитика
+                </button>
+                <button class="tab-btn" data-tab="tasks">
+                    <span>✅</span> Задачи
+                </button>
+                <button class="tab-btn" data-tab="resources">
+                    <span>👥</span> Ресурсы
+                </button>
+                <button class="tab-btn" data-tab="schedule">
+                    <span>📅</span> Расписание
+                </button>
+                <button class="tab-btn" data-tab="reports">
+                    <span>📊</span> Отчеты
+                </button>
+            </div>
+
+            <div class="tabs-content">
+                <!-- Overview Tab -->
+                <div class="tab-pane active" id="overview">
+                    <div class="overview-grid">
+                        <div class="overview-card overview-status">
+                            <h3 class="card-title">📋 Статус задач</h3>
+                            <div class="status-grid">
+                                @if (ViewBag.Analytics?.TaskStatusDistribution != null)
+                                {
+                                    <div class="status-item status-not-started">
+                                        <div class="status-count">@ViewBag.Analytics.TaskStatusDistribution["Not Started"]</div>
+                                        <div class="status-label">Не начато</div>
                                     </div>
-                                    <div class="activity-content">
-                                        <div class="activity-text">@activity.Description</div>
-                                        <div class="activity-time">@activity.Timestamp.ToString("hh:mm tt")</div>
+                                    <div class="status-item status-in-progress">
+                                        <div class="status-count">@ViewBag.Analytics.TaskStatusDistribution["In Progress"]</div>
+                                        <div class="status-label">В процессе</div>
                                     </div>
-                                </div>
-                            }
+                                    <div class="status-item status-completed">
+                                        <div class="status-count">@ViewBag.Analytics.TaskStatusDistribution["Completed"]</div>
+                                        <div class="status-label">Завершено</div>
+                                    </div>
+                                    <div class="status-item status-overdue">
+                                        <div class="status-count">@ViewBag.Analytics.TaskStatusDistribution["Overdue"]</div>
+                                        <div class="status-label">Просрочено</div>
+                                    </div>
+                                }
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="overview-card overview-peak-hours">
-                        <h3 class="card-title">⏰ Peak Hours</h3>
-                        <div class="peak-hours-chart">
-                            <canvas id="peakHoursChart"></canvas>
+                        <div class="overview-card overview-activities">
+                            <h3 class="card-title">🕐 Последние действия</h3>
+                            <div class="activities-list">
+                                @if (ViewBag.RecentActivities != null)
+                                {
+                                    foreach (var activity in ViewBag.RecentActivities)
+                                    {
+                                        <div class="activity-item">
+                                            <div class="activity-icon">
+                                                @(activity.Type == "Task" ? "✅" : "🕐")
+                                            </div>
+                                            <div class="activity-content">
+                                                <div class="activity-text">@activity.Description</div>
+                                                <div class="activity-time">@activity.Timestamp.ToString("HH:mm")</div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Analytics Tab -->
-            <div class="tab-pane" id="analytics">
-                @await Html.PartialAsync("_AnalyticsPartial", ViewBag.Analytics)
-            </div>
-
-            <!-- Tasks Tab -->
-            <div class="tab-pane" id="tasks">
-                @await Html.PartialAsync("_TasksPartial")
-            </div>
-
-            <!-- Resources Tab -->
-            <div class="tab-pane" id="resources">
-                @await Html.PartialAsync("_ResourcesPartial")
-            </div>
-
-            <!-- Schedule Tab -->
-            <div class="tab-pane" id="schedule">
-                @await Html.PartialAsync("_SchedulePartial")
-            </div>
-
-            <!-- Reports Tab -->
-            <div class="tab-pane" id="reports">
-                <div class="reports-grid">
-                    <div class="report-card">
-                        <h3 class="card-title">📋 Performance Report</h3>
-                        <div class="report-content">
-                            <div class="report-metric">
-                                <span class="metric-label">Completion Rate:</span>
-                                <span class="metric-value">@ViewBag.Analytics.TaskCompletionRate.ToString("0.0")%</span>
+                <!-- Analytics Tab -->
+                <div class="tab-pane" id="analytics">
+                    <div class="analytics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        @if (ViewBag.Analytics != null)
+                        {
+                            <div class="overview-card">
+                                <h3 class="card-title">📊 Статистика по дням</h3>
+                                <div id="dailyTasksChart" style="height: 200px;">
+                                    <!-- Chart will be rendered here -->
+                                </div>
                             </div>
-                            <div class="report-metric">
-                                <span class="metric-label">Avg. Task Duration:</span>
-                                <span class="metric-value">24.5 hrs</span>
+
+                            <div class="overview-card">
+                                <h3 class="card-title">👥 Производительность ресурсов</h3>
+                                <div class="performance-list" style="max-height: 300px; overflow-y: auto;">
+                                    @if (ViewBag.Analytics.ResourcePerformance != null)
+                                    {
+                                        foreach (var performance in ViewBag.Analytics.ResourcePerformance)
+                                        {
+                                            <div class="performance-item" style="margin-bottom: 15px;">
+                                                <div class="resource-name" style="font-size: 14px; color: var(--dark); margin-bottom: 8px; font-weight: 600;">@performance.Key</div>
+                                                <div class="performance-bar" style="height: 20px; background: var(--gray-light); border-radius: 10px; position: relative; overflow: hidden;">
+                                                    <div class="bar-fill" style="height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 10px; width: @performance.Value%;"></div>
+                                                    <span class="performance-value" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; font-weight: 600; color: var(--dark);">@performance.Value.ToString("0.0")%</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
                             </div>
-                            <div class="report-metric">
-                                <span class="metric-label">Resource Utilization:</span>
-                                <span class="metric-value">@ViewBag.Stats.ResourcesUtilization.ToString("0.0")%</span>
-                            </div>
-                            <button class="btn-generate-report">Generate PDF Report</button>
-                        </div>
+                        }
                     </div>
+                </div>
 
-                    <div class="report-card">
-                        <h3 class="card-title">📅 Schedule Analysis</h3>
-                        <div class="report-content">
-                            <div class="schedule-metrics">
-                                <div class="metric-circle">
-                                    <div class="circle-value">@ViewBag.Stats.ActiveShifts</div>
-                                    <div class="circle-label">Active Shifts</div>
+                <!-- Tasks Tab -->
+                <div class="tab-pane" id="tasks">
+                    <div id="taskGridContainer">
+                        <div id="taskGrid" style="height: 500px;"></div>
+                    </div>
+                </div>
+
+                <!-- Resources Tab -->
+                <div class="tab-pane" id="resources">
+                    <div id="resourceGridContainer">
+                        <div id="resourceGrid" style="height: 500px;"></div>
+                    </div>
+                </div>
+
+                <!-- Schedule Tab -->
+                <div class="tab-pane" id="schedule">
+                    <div id="scheduleGridContainer">
+                        <div id="shiftTaskGrid" style="height: 500px;"></div>
+                    </div>
+                </div>
+
+                <!-- Reports Tab -->
+                <div class="tab-pane" id="reports">
+                    <div class="reports-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        <div class="overview-card">
+                            <h3 class="card-title">📋 Отчет по производительности</h3>
+                            <div class="report-content">
+                                <div class="report-metric" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--gray-light);">
+                                    <span class="metric-label" style="color: var(--gray); font-size: 14px;">Процент выполнения:</span>
+                                    <span class="metric-value" style="font-weight: 700; color: var(--dark); font-size: 16px;">@(ViewBag.Analytics?.TaskCompletionRate?.ToString("0.0") ?? "0")%</span>
                                 </div>
-                                <div class="metric-circle">
-                                    <div class="circle-value">@ViewBag.Stats.ScheduledTasks</div>
-                                    <div class="circle-label">Scheduled Tasks</div>
+                                <div class="report-metric" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--gray-light);">
+                                    <span class="metric-label" style="color: var(--gray); font-size: 14px;">Утилизация ресурсов:</span>
+                                    <span class="metric-value" style="font-weight: 700; color: var(--dark); font-size: 16px;">@ViewBag.Stats?.ResourcesUtilization?.ToString("0.0")%</span>
                                 </div>
-                            </div>
-                            <div class="schedule-timeline">
-                                <h4>Upcoming Deadlines</h4>
-                                <div class="timeline-items">
-                                    <!-- Timeline items will be populated by JavaScript -->
-                                </div>
+                                <button class="btn-generate-report" onclick="generateReport()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: var(--transition); margin-top: 20px;">
+                                    Создать PDF отчет
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Quick Actions Panel -->
-    <div class="quick-actions">
-        <h3 class="actions-title">⚡ Quick Actions</h3>
-        <div class="actions-grid">
-            <button class="action-btn btn-create-task" onclick="createNewTask()">
-                <i class="action-icon">➕</i>
-                <span class="action-text">Create Task</span>
-            </button>
-            <button class="action-btn btn-schedule-shift" onclick="scheduleShift()">
-                <i class="action-icon">🕐</i>
-                <span class="action-text">Schedule Shift</span>
-            </button>
-            <button class="action-btn btn-generate-report" onclick="generateReport()">
-                <i class="action-icon">📊</i>
-                <span class="action-text">Generate Report</span>
-            </button>
-            <button class="action-btn btn-notifications" onclick="showNotifications()">
-                <i class="action-icon">🔔</i>
-                <span class="action-text">Notifications</span>
-                <span class="notification-badge">3</span>
-            </button>
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h3 class="actions-title">⚡ Быстрые действия</h3>
+            <div class="actions-grid">
+                <button class="action-btn btn-create-task" onclick="createNewTask()">
+                    <div class="action-icon">➕</div>
+                    <span class="action-text">Создать задачу</span>
+                </button>
+                <button class="action-btn btn-schedule-shift" onclick="scheduleShift()">
+                    <div class="action-icon">🕐</div>
+                    <span class="action-text">Запланировать смену</span>
+                </button>
+                <button class="action-btn btn-generate-report" onclick="generateReport()">
+                    <div class="action-icon">📊</div>
+                    <span class="action-text">Создать отчет</span>
+                </button>
+                <button class="action-btn btn-notifications" onclick="showNotifications()">
+                    <div class="action-icon">🔔</div>
+                    <span class="action-text">Уведомления</span>
+                    <span class="notification-badge">3</span>
+                </button>
+            </div>
         </div>
     </div>
-</div>
-
-@section Scripts {
-    <script src="~/js/dashboard.js"></script>
-    <script src="~/js/charts.js"></script>
-    <script src="~/js/animations.js"></script>
 
     <script>
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeDashboard();
-            initializeCharts();
-            startClock();
+        // Инициализация дашборда
+        function initializeDashboard() {
+            updateClock();
+            setInterval(updateClock, 1000);
+            initializeTabSwitching();
+            loadGrids();
+        }
 
-            // Load tab content dynamically
+        // Обновление времени и даты
+        function updateClock() {
+            const now = new Date();
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour12: true, hour: 'numeric', minute: '2-digit' };
+
+            document.getElementById('currentDate').textContent =
+                now.toLocaleDateString('ru-RU', dateOptions);
+            document.getElementById('currentTime').textContent =
+                now.toLocaleTimeString('ru-RU', timeOptions);
+        }
+
+        // Переключение вкладок
+        function initializeTabSwitching() {
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-tab');
-                    loadTabContent(tabId);
+                    switchTab(tabId);
                 });
             });
-        });
-
-        function initializeDashboard() {
-            // Update stats with animations
-            updateStatsWithAnimation();
-
-            // Initialize tooltips
-            initializeTooltips();
-
-            // Set up auto-refresh
-            setInterval(refreshStats, 30000); // Every 30 seconds
         }
 
+        function switchTab(tabId) {
+            // Обновить активное состояние кнопок
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Скрыть все панели
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+
+            // Показать выбранную панель
+            document.getElementById(tabId).classList.add('active');
+
+            // Загрузить данные для вкладки при необходимости
+            loadTabData(tabId);
+        }
+
+        // Загрузка данных для вкладок
+        function loadTabData(tabId) {
+            switch(tabId) {
+                case 'tasks':
+                    loadTaskGrid();
+                    break;
+                case 'resources':
+                    loadResourceGrid();
+                    break;
+                case 'schedule':
+                    loadScheduleGrid();
+                    break;
+            }
+        }
+
+        // Загрузка сеток данных
+        function loadGrids() {
+            loadTaskGrid();
+            loadResourceGrid();
+            loadScheduleGrid();
+        }
+
+        function loadTaskGrid() {
+            const source = {
+                datatype: 'json',
+                datafields: [
+                    { name: 'uid', type: 'string' },
+                    { name: 'name', type: 'string' },
+                    { name: 'time_ins', type: 'date' },
+                    { name: 'time_pref_start', type: 'date' },
+                    { name: 'time_pref_finish', type: 'date' },
+                    { name: 'duration', type: 'int' },
+                    { name: 'company_id', type: 'string' },
+                ],
+                id: 'uid',
+                url: '/Task'
+            };
+
+            const dataAdapter = new $.jqx.dataAdapter(source);
+
+            $('#taskGrid').jqxGrid({
+                width: '100%',
+                height: '100%',
+                source: dataAdapter,
+                columns: [
+                    { text: '№', width: '50', cellsrenderer: function (row) { return row + 1; } },
+                    { text: 'Название', datafield: 'name', width: '200' },
+                    { text: 'Создано', datafield: 'time_ins', width: '150', cellsformat: 'dd.MM.yyyy HH:mm' },
+                    { text: 'Начало', datafield: 'time_pref_start', width: '150', cellsformat: 'dd.MM.yyyy HH:mm' },
+                    { text: 'Завершение', datafield: 'time_pref_finish', width: '150', cellsformat: 'dd.MM.yyyy HH:mm' },
+                    { text: 'Длительность', datafield: 'duration', width: '100' }
+                ]
+            });
+        }
+
+        function loadResourceGrid() {
+            const source = {
+                datatype: 'json',
+                datafields: [
+                    { name: 'uid', type: 'string' },
+                    { name: 'name', type: 'string' },
+                    { name: 'time_ins', type: 'date' },
+                    { name: 'company_id', type: 'string' },
+                ],
+                id: 'uid',
+                url: '/Resource'
+            };
+
+            const dataAdapter = new $.jqx.dataAdapter(source);
+
+            $('#resourceGrid').jqxGrid({
+                width: '100%',
+                height: '100%',
+                source: dataAdapter,
+                columns: [
+                    { text: '№', width: '50', cellsrenderer: function (row) { return row + 1; } },
+                    { text: 'Название', datafield: 'name', width: '200' },
+                    { text: 'Создан', datafield: 'time_ins', width: '150', cellsformat: 'dd.MM.yyyy HH:mm' },
+                    { text: 'Компания', datafield: 'company_id', width: '150' }
+                ]
+            });
+        }
+
+        function loadScheduleGrid() {
+            const source = {
+                datatype: 'json',
+                datafields: [
+                    { name: 'shift_id', type: 'string' },
+                    { name: 'shift_name', type: 'string' },
+                    { name: 'task_id', type: 'string' },
+                    { name: 'task_name', type: 'string' },
+                    { name: 'time_ins', type: 'date' },
+                    { name: 'time_sched_start', type: 'date' },
+                    { name: 'time_sched_finish', type: 'date' },
+                    { name: 'idle_dur', type: 'int' },
+                ],
+                url: '/ShiftTask/GetShiftTasks'
+            };
+
+            const dataAdapter = new $.jqx.dataAdapter(source);
+
+            $('#shiftTaskGrid').jqxGrid({
+                width: '100%',
+                height: '100%',
+                source: dataAdapter,
+                columns: [
+                    { text: '№', width: '50', cellsrenderer: function (row) { return row + 1; } },
+                    { text: 'Смена', datafield: 'shift_name', width: '150' },
+                    { text: 'Задача', datafield: 'task_name', width: '150' },
+                    { text: 'Начало', datafield: 'time_sched_start', width: '150', cellsformat: 'dd.MM.yyyy HH:mm' },
+                    { text: 'Завершение', datafield: 'time_sched_finish', width: '150', cellsformat: 'dd.MM.yyyy HH:mm' },
+                    { text: 'Простой', datafield: 'idle_dur', width: '100' }
+                ]
+            });
+        }
+
+        // Обновление дашборда
         function refreshDashboard() {
-            // Show loading animation
             document.querySelector('.dashboard-container').classList.add('refreshing');
 
             fetch('/Dashboard/GetStats')
                 .then(response => response.json())
                 .then(stats => {
                     updateStats(stats);
-                    document.querySelector('.dashboard-container').classList.remove('refreshing');
-
-                    // Show success notification
-                    showNotification('Dashboard refreshed successfully!', 'success');
-                })
-                .catch(error => {
-                    console.error('Error refreshing dashboard:', error);
-                    showNotification('Failed to refresh dashboard', 'error');
+                    setTimeout(() => {
+                        document.querySelector('.dashboard-container').classList.remove('refreshing');
+                        showNotification('Дашборд обновлен', 'success');
+                    }, 500);
                 });
         }
 
         function updateStats(stats) {
-            // Animate stat updates
-            animateStatUpdate('totalTasks', stats.totalTasks);
-            animateStatUpdate('activeTasks', stats.activeTasks);
-            animateStatUpdate('totalResources', stats.totalResources);
-            animateStatUpdate('productivityScore', stats.productivityScore.toFixed(1) + '%');
+            // Анимированное обновление статистики
+            animateNumber('totalTasks', stats.totalTasks);
+            animateNumber('activeTasks', stats.activeTasks);
+            animateNumber('totalResources', stats.totalResources);
+            document.getElementById('productivityScore').textContent = stats.productivityScore.toFixed(1) + '%';
         }
 
-        function animateStatUpdate(elementId, newValue) {
+        function animateNumber(elementId, targetValue) {
             const element = document.getElementById(elementId);
             if (element) {
-                element.style.animation = 'pulse 0.5s';
-                setTimeout(() => {
-                    element.textContent = newValue;
-                    element.style.animation = '';
-                }, 250);
-            }
-        }
+                const current = parseInt(element.textContent) || 0;
+                let currentValue = current;
+                const duration = 1000;
+                const start = Date.now();
 
-        function loadTabContent(tabId) {
-            // Show loading state
-            const tabPane = document.getElementById(tabId);
-            tabPane.classList.add('loading');
+                function update() {
+                    const elapsed = Date.now() - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    currentValue = current + (targetValue - current) * progress;
+                    element.textContent = Math.round(currentValue);
 
-            // Simulate loading (in real app, this would be an API call)
-            setTimeout(() => {
-                tabPane.classList.remove('loading');
-
-                // Update tab content based on tabId
-                switch(tabId) {
-                    case 'analytics':
-                        loadAnalyticsData();
-                        break;
-                    case 'tasks':
-                        loadTasksData();
-                        break;
-                    case 'resources':
-                        loadResourcesData();
-                        break;
-                    case 'schedule':
-                        loadScheduleData();
-                        break;
+                    if (progress < 1) {
+                        requestAnimationFrame(update);
+                    }
                 }
-            }, 500);
-        }
 
-        function startClock() {
-            function updateClock() {
-                const now = new Date();
-                document.getElementById('currentDate').textContent =
-                    now.toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
-                document.getElementById('currentTime').textContent =
-                    now.toLocaleTimeString('en-US', {
-                        hour12: true,
-                        hour: 'numeric',
-                        minute: '2-digit'
-                    });
+                update();
             }
-
-            updateClock();
-            setInterval(updateClock, 1000);
         }
 
+        // Показать уведомление
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
-            notification.className = `notification notification-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                border-radius: 8px;
+                padding: 15px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                z-index: 1000;
+                animation: slideInRight 0.3s ease;
+                border-left: 4px solid ${type === 'success' ? '#10b981' : '#ef4444'};
+            `;
+
             notification.innerHTML = `
-                <div class="notification-content">
-                    <i class="notification-icon">${type === 'success' ? '✅' : '❌'}</i>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>${type === 'success' ? '✅' : '❌'}</span>
                     <span>${message}</span>
                 </div>
-                <button class="notification-close" onclick="this.parentElement.remove()">×</button>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #9ca3af;">×</button>
             `;
 
             document.body.appendChild(notification);
 
-            // Auto remove after 5 seconds
             setTimeout(() => {
                 if (notification.parentElement) {
                     notification.remove();
                 }
             }, 5000);
         }
+
+        // Быстрые действия
+        function createNewTask() {
+            showNotification('Создание новой задачи...', 'info');
+        }
+
+        function scheduleShift() {
+            showNotification('Планирование смены...', 'info');
+        }
+
+        function generateReport() {
+            showNotification('Генерация отчета...', 'info');
+        }
+
+        function showNotifications() {
+            showNotification('Загрузка уведомлений...', 'info');
+        }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
     </script>
-}
+</body>
+</html>
