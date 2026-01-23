@@ -9,30 +9,32 @@ namespace PlannerApi.Controllers
     public class TaskController : ControllerBase
     {
         private readonly ILogger<TaskController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public TaskController(ILogger<TaskController> logger)
+        public TaskController(ILogger<TaskController> logger, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration;
         }
 
         [HttpGet(Name = "GetTasks")]
-        public IEnumerable<Models.task> Get()
+        public IEnumerable<Models.Task> Get()
         {
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             return db.GetTasks().ToArray();
         }
 
         [HttpPut(Name = "PutTask")]
-        public bool Put(Models.task task)
+        public bool Put(Models.Task task)
         {
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             return db.PutTask(task);
         }
 
         [HttpPost("ClearTasks")]
         public bool Clear()
         {
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             return db.ClearTasks();
         }
 
@@ -47,10 +49,10 @@ namespace PlannerApi.Controllers
 
             TimeSpan timeSpan = endDate - startDate;
 
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             for (int i = 0; i < 10; i++)
             {
-                var task = new Models.task();
+                var task = new Models.Task();
                 task.company_id = company_id;
                 task.name = i.ToString() + " " + i.ToString() + " " + i.ToString();
                 task.time_ins = time_ins;

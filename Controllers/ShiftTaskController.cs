@@ -10,30 +10,32 @@ namespace PlannerApi.Controllers
     public class ShiftTaskController : ControllerBase
     {
         private readonly ILogger<ShiftTaskController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public ShiftTaskController(ILogger<ShiftTaskController> logger)
+        public ShiftTaskController(ILogger<ShiftTaskController> logger, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration;
         }
 
         [HttpGet("GetShiftTasks")]
-        public IEnumerable<Models.shift_task> Get()
+        public IEnumerable<Models.ShiftTask> Get()
         {
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             return db.GetShiftTasks().ToArray();
         }
 
         [HttpPost("ClearShiftTasks")]
         public bool Clear()
         {
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             return db.ClearShiftTasks();
         }
 
         [HttpPost("StartScheduler")]
-        public async Task<ActionResult> Start(bool sinc = false)
+        public async Task<IActionResult> Start(bool sinc = false)
         {
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             await db.StartScheduler(sinc);
             return Ok();
         }

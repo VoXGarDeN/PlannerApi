@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace PlannerApi.Models
 {
     // Основные сущности
-    public class resource
+    public class Resource
     {
         public Guid uid { get; set; }
         public string name { get; set; } = "";
@@ -12,7 +12,7 @@ namespace PlannerApi.Models
         public Guid company_id { get; set; }
     }
 
-    public class task
+    public class Task
     {
         public Guid uid { get; set; }
         public string name { get; set; } = "";
@@ -23,7 +23,7 @@ namespace PlannerApi.Models
         public Guid company_id { get; set; }
     }
 
-    public class shift
+    public class Shift
     {
         public Guid uid { get; set; }
         public string name { get; set; } = "";
@@ -34,7 +34,7 @@ namespace PlannerApi.Models
         public DateTime? time_free { get; set; }
     }
 
-    public class shift_task
+    public class ShiftTask
     {
         public Guid shift_id { get; set; }
         public string shift_name { get; set; } = "";

@@ -10,10 +10,12 @@ namespace PlannerApi.Controllers
     public class DashboardController : Controller
     {
         private readonly ILogger<DashboardController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public DashboardController(ILogger<DashboardController> logger)
+        public DashboardController(ILogger<DashboardController> logger, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -21,7 +23,7 @@ namespace PlannerApi.Controllers
         [Route("/")]
         public IActionResult Index()
         {
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             var stats = GetDashboardStats(db);
             var analytics = GetAnalyticsData(db);
             var recentActivities = GetRecentActivities(db);
@@ -37,7 +39,7 @@ namespace PlannerApi.Controllers
         [HttpGet("GetStats")]
         public IActionResult GetStats()
         {
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             var stats = GetDashboardStats(db);
             return Json(stats);
         }
@@ -45,7 +47,7 @@ namespace PlannerApi.Controllers
         [HttpGet("GetAnalytics")]
         public IActionResult GetAnalytics()
         {
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             var analytics = GetAnalyticsData(db);
             return Json(analytics);
         }
@@ -53,7 +55,7 @@ namespace PlannerApi.Controllers
         [HttpGet("GetRecentActivities")]
         public IActionResult GetRecentActivitiesApi()
         {
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             var activities = GetRecentActivities(db);
             return Json(activities);
         }
@@ -184,7 +186,7 @@ namespace PlannerApi.Controllers
             }
         }
 
-        private float CalculateProductivityScore(List<Models.task> tasks, List<Models.shift_task> shiftTasks)
+        private float CalculateProductivityScore(List<Models.Task> tasks, List<Models.ShiftTask> shiftTasks)
         {
             if (tasks.Count == 0) return 0;
 
@@ -195,7 +197,7 @@ namespace PlannerApi.Controllers
                    (float)scheduledTasks / tasks.Count * 100) / 2;
         }
 
-        private float CalculateUtilization(List<Models.resource> resources, List<Models.shift> shifts, List<Models.shift_task> shiftTasks)
+        private float CalculateUtilization(List<Models.Resource> resources, List<Models.Shift> shifts, List<Models.ShiftTask> shiftTasks)
         {
             if (resources.Count == 0) return 0;
 
@@ -239,7 +241,7 @@ namespace PlannerApi.Controllers
             return performance;
         }
 
-        private Dictionary<int, int> CalculatePeakHours(List<Models.shift> shifts)
+        private Dictionary<int, int> CalculatePeakHours(List<Models.Shift> shifts)
         {
             var hourlyCounts = new Dictionary<int, int>();
 
@@ -252,7 +254,7 @@ namespace PlannerApi.Controllers
             return hourlyCounts;
         }
 
-        private float CalculateCompletionRate(List<Models.task> tasks, List<Models.shift_task> shiftTasks)
+        private float CalculateCompletionRate(List<Models.Task> tasks, List<Models.ShiftTask> shiftTasks)
         {
             if (tasks.Count == 0) return 0;
 

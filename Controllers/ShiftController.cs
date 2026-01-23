@@ -9,30 +9,32 @@ namespace PlannerApi.Controllers
     public class ShiftController : ControllerBase
     {
         private readonly ILogger<ShiftController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public ShiftController(ILogger<ShiftController> logger)
+        public ShiftController(ILogger<ShiftController> logger, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration;
         }
 
         [HttpGet(Name = "GetShifts")]
-        public IEnumerable<Models.shift> Get()
+        public IEnumerable<Models.Shift> Get()
         {
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             return db.GetShifts().ToArray();
         }
 
         [HttpPut(Name = "PutShift")]
-        public bool Put(Models.shift shift)
+        public bool Put(Models.Shift shift)
         {
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             return db.PutShift(shift);
         }
 
         [HttpPost("ClearShifts")]
         public bool Clear()
         {
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             return db.ClearShifts();
         }
 
@@ -46,14 +48,14 @@ namespace PlannerApi.Controllers
 
             TimeSpan timeSpan = endDate - startDate;
 
-            using var db = new Models.ConnectToDb();
+            using var db = new Models.ConnectToDb(_configuration);
             var resources = db.GetResources();
 
             foreach (var res in resources)
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    var shift = new Models.shift();
+                    var shift = new Models.Shift();
                     shift.name = res.name + " " + i.ToString() + " " + i.ToString();
                     shift.time_ins = time_ins;
                     shift.uid = Guid.NewGuid();
