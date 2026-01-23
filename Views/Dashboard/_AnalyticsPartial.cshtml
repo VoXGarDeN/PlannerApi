@@ -1,0 +1,81 @@
+﻿@model AnalyticsData
+
+<div class="analytics-grid">
+    <div class="analytics-card">
+        <h3 class="card-title">📊 Daily Task Progress</h3>
+        <div class="chart-container">
+            <canvas id="dailyTasksChart"></canvas>
+        </div>
+    </div>
+
+    <div class="analytics-card">
+        <h3 class="card-title">👥 Resource Performance</h3>
+        <div class="performance-list">
+            @foreach (var performance in Model.ResourcePerformance.OrderByDescending(x => x.Value).Take(8))
+            {
+                <div class="performance-item">
+                    <div class="resource-name">@performance.Key</div>
+                    <div class="performance-bar">
+                        <div class="bar-fill" style="width: @performance.Value%"></div>
+                        <span class="performance-value">@performance.Value.ToString("0.0")%</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="analytics-card">
+        <h3 class="card-title">📈 Task Status Distribution</h3>
+        <div class="chart-container">
+            <canvas id="statusDistributionChart"></canvas>
+        </div>
+    </div>
+
+    <div class="analytics-card">
+        <h3 class="card-title">📋 Efficiency Metrics</h3>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">⚡</div>
+                <div class="metric-content">
+                    <div class="metric-value">@Model.TaskCompletionRate.ToString("0.0")%</div>
+                    <div class="metric-label">Completion Rate</div>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">⏱️</div>
+                <div class="metric-content">
+                    <div class="metric-value">@(Model.PeakHours.Values.Max())</div>
+                    <div class="metric-label">Peak Concurrent</div>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">📅</div>
+                <div class="metric-content">
+                    <div class="metric-value">@Model.DailyTasks.Count</div>
+                    <div class="metric-label">Days Tracked</div>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">📈</div>
+                <div class="metric-content">
+                    <div class="metric-value">
+                        @if (Model.DailyTasks.Count > 1)
+                        {
+                            var firstDay = Model.DailyTasks.First().Value;
+                            var lastDay = Model.DailyTasks.Last().Value;
+                            var trend = lastDay.Count - firstDay.Count;
+                            <span class="@(trend > 0 ? "trend-up" : "trend-down")">
+                                @(trend > 0 ? "+" : "")@trend
+                            </span>
+                        }
+                        else
+                        {
+                            <span>0</span>
+                        }
+                    </div>
+                    <div class="metric-label">Task Trend</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
