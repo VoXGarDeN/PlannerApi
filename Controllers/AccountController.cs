@@ -5,14 +5,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-
 namespace PlannerApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     public class AccountController : ControllerBase
     {
-        // Простая модель пользователя (демо). В реале храните в БД.
         private class AppUser
         {
             public string UserName { get; set; } = "";
@@ -27,7 +25,7 @@ namespace PlannerApi.Controllers
             _users = new List<AppUser>();
 
             var admin = new AppUser { UserName = "admin" };
-            admin.PasswordHash = _hasher.HashPassword(admin, "admin"); // хешированный пароль "admin"
+            admin.PasswordHash = _hasher.HashPassword(admin, "admin");
             _users.Add(admin);
         }
 
@@ -119,7 +117,6 @@ namespace PlannerApi.Controllers
                     if (verify == PasswordVerificationResult.SuccessRehashNeeded)
                     {
                         user.PasswordHash = _hasher.HashPassword(user, password);
-                        // в проде — сохранить в БД
                     }
 
                     var claims = new List<Claim> { new Claim(ClaimTypes.Name, user.UserName), new Claim(ClaimTypes.Role, "Admin") };
@@ -128,12 +125,11 @@ namespace PlannerApi.Controllers
 
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(ci), props);
 
-                    // после успешной аутентификации — идём на панель Planner
-                    return Redirect("/Planner");
+                    // ИЗМЕНЕНО: Перенаправление на главную страницу дашборда
+                    return Redirect("/");
                 }
             }
 
-            // страница ошибки с задержкой 2 секунды
             return Content(@"<!doctype html><html lang='ru'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Ошибка</title>
 <style>body{display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#667eea,#764ba2);font-family:Inter,system-ui,-apple-system;color:#111} .card{background:#fff;padding:36px;border-radius:14px;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.12)} .bar{height:4px;background:#ef4444;width:0%;animation:load 2s linear forwards;border-radius:2px;margin-top:18px}@keyframes load{from{width:0}to{width:100%}}</style>
 <script>setTimeout(function(){location.href='/Account/Login?error=true'},2000)</script>

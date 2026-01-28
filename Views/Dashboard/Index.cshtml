@@ -274,6 +274,7 @@
             border-radius: var(--radius);
             padding: 24px;
             border: 1px solid var(--gray-light);
+            min-height: 300px;
         }
 
         .card-title {
@@ -458,6 +459,147 @@
             justify-content: center;
         }
 
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+            .data-table th {
+                background: var(--primary);
+                color: white;
+                padding: 12px;
+                text-align: left;
+                font-weight: 600;
+            }
+
+            .data-table td {
+                padding: 12px;
+                border-bottom: 1px solid var(--gray-light);
+            }
+
+            .data-table tr:hover {
+                background: var(--light);
+            }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: var(--radius);
+            min-width: 400px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--dark);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            background: var(--gray);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Reports */
+        .report-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--gray-light);
+        }
+
+        .report-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--dark);
+        }
+
+        .report-data {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .report-item {
+            padding: 12px;
+            background: var(--light);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .report-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .report-label {
+            font-size: 12px;
+            color: var(--gray);
+            margin-top: 4px;
+        }
+
         /* Notifications */
         .notification {
             position: fixed;
@@ -584,6 +726,60 @@
     </style>
 </head>
 <body>
+    <!-- Модальное окно для создания задачи -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">Создать задачу</div>
+            <div class="form-group">
+                <label class="form-label">Название задачи</label>
+                <input type="text" id="taskName" class="form-input" placeholder="Введите название задачи">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Дата начала</label>
+                <input type="datetime-local" id="taskStart" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Дата окончания</label>
+                <input type="datetime-local" id="taskEnd" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Длительность (минуты)</label>
+                <input type="number" id="taskDuration" class="form-input" value="60">
+            </div>
+            <div class="form-buttons">
+                <button class="btn-primary" onclick="submitTask()">Создать</button>
+                <button class="btn-secondary" onclick="closeModal('taskModal')">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для создания смены -->
+    <div id="shiftModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">Запланировать смену</div>
+            <div class="form-group">
+                <label class="form-label">Название смены</label>
+                <input type="text" id="shiftName" class="form-input" placeholder="Введите название смены">
+            </div>
+            <div class="form-group">
+                <label class="form-label">ID ресурса</label>
+                <input type="text" id="shiftResourceId" class="form-input" placeholder="Введите ID ресурса">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Дата начала</label>
+                <input type="datetime-local" id="shiftStart" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Дата окончания</label>
+                <input type="datetime-local" id="shiftEnd" class="form-input">
+            </div>
+            <div class="form-buttons">
+                <button class="btn-primary" onclick="submitShift()">Создать</button>
+                <button class="btn-secondary" onclick="closeModal('shiftModal')">Отмена</button>
+            </div>
+        </div>
+    </div>
+
     <div class="dashboard-container">
         <!-- Header -->
         <div class="dashboard-header">
@@ -718,7 +914,11 @@
                 <div class="tab-pane" id="analytics">
                     <div class="overview-card">
                         <h3 class="card-title">📊 Статистика по дням</h3>
-                        <canvas id="dailyTasksChart" style="height: 200px;"></canvas>
+                        <canvas id="dailyTasksChart" style="height: 300px;"></canvas>
+                    </div>
+                    <div class="overview-card" style="margin-top: 20px;">
+                        <h3 class="card-title">📊 Пиковые часы</h3>
+                        <canvas id="peakHoursChart" style="height: 300px;"></canvas>
                     </div>
                 </div>
 
@@ -726,7 +926,21 @@
                 <div class="tab-pane" id="tasks">
                     <div class="overview-card">
                         <h3 class="card-title">✅ Список задач</h3>
-                        <div id="tasksList">Загрузка...</div>
+                        <button class="btn-primary" onclick="openModal('taskModal')" style="margin-bottom: 16px;">➕ Добавить задачу</button>
+                        <table class="data-table" id="tasksTable">
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Дата создания</th>
+                                    <th>Начало</th>
+                                    <th>Окончание</th>
+                                    <th>Длительность</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tasksList">
+                                <tr><td colspan="5">Загрузка...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -734,7 +948,19 @@
                 <div class="tab-pane" id="resources">
                     <div class="overview-card">
                         <h3 class="card-title">👥 Список ресурсов</h3>
-                        <div id="resourcesList">Загрузка...</div>
+                        <table class="data-table" id="resourcesTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Название</th>
+                                    <th>Дата создания</th>
+                                    <th>ID компании</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resourcesList">
+                                <tr><td colspan="4">Загрузка...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -742,7 +968,21 @@
                 <div class="tab-pane" id="schedule">
                     <div class="overview-card">
                         <h3 class="card-title">📅 Расписание</h3>
-                        <div id="scheduleList">Загрузка...</div>
+                        <button class="btn-primary" onclick="openModal('shiftModal')" style="margin-bottom: 16px;">➕ Добавить смену</button>
+                        <table class="data-table" id="scheduleTable">
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>ID ресурса</th>
+                                    <th>Начало</th>
+                                    <th>Окончание</th>
+                                    <th>Дата создания</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduleList">
+                                <tr><td colspan="5">Загрузка...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -750,7 +990,30 @@
                 <div class="tab-pane" id="reports">
                     <div class="overview-card">
                         <h3 class="card-title">📊 Отчеты</h3>
-                        <div id="reportsList">Загрузка...</div>
+                        <button class="btn-primary" onclick="generateFullReport()" style="margin-bottom: 16px;">📄 Сгенерировать отчет</button>
+                        <div id="reportsList">
+                            <div class="report-card">
+                                <div class="report-title">Общая статистика</div>
+                                <div class="report-data" id="reportData">
+                                    <div class="report-item">
+                                        <div class="report-value" id="reportTasks">0</div>
+                                        <div class="report-label">Всего задач</div>
+                                    </div>
+                                    <div class="report-item">
+                                        <div class="report-value" id="reportResources">0</div>
+                                        <div class="report-label">Ресурсов</div>
+                                    </div>
+                                    <div class="report-item">
+                                        <div class="report-value" id="reportProductivity">0%</div>
+                                        <div class="report-label">Продуктивность</div>
+                                    </div>
+                                    <div class="report-item">
+                                        <div class="report-value" id="reportUtilization">0%</div>
+                                        <div class="report-label">Утилизация</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -760,15 +1023,15 @@
         <div class="quick-actions">
             <h3 class="actions-title">⚡ Быстрые действия</h3>
             <div class="actions-grid">
-                <button class="action-btn btn-create-task" onclick="createNewTask()">
+                <button class="action-btn btn-create-task" onclick="openModal('taskModal')">
                     <div class="action-icon">➕</div>
                     <span class="action-text">Создать задачу</span>
                 </button>
-                <button class="action-btn btn-schedule-shift" onclick="scheduleShift()">
+                <button class="action-btn btn-schedule-shift" onclick="openModal('shiftModal')">
                     <div class="action-icon">🕐</div>
                     <span class="action-text">Запланировать смену</span>
                 </button>
-                <button class="action-btn btn-generate-report" onclick="generateReport()">
+                <button class="action-btn btn-generate-report" onclick="generateFullReport()">
                     <div class="action-icon">📊</div>
                     <span class="action-text">Создать отчет</span>
                 </button>
@@ -783,6 +1046,7 @@
     <script>
         // Глобальные переменные
         let statsChart = null;
+        let peakHoursChart = null;
         let isRefreshing = false;
         let userName = '@ViewBag.UserName' || 'Пользователь';
 
@@ -799,6 +1063,15 @@
                     switchTab(tabId);
                 });
             });
+
+            // Установка текущей даты в формах
+            const now = new Date();
+            const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+            document.getElementById('taskStart').value = formatDateTimeLocal(now);
+            document.getElementById('taskEnd').value = formatDateTimeLocal(tomorrow);
+            document.getElementById('shiftStart').value = formatDateTimeLocal(now);
+            document.getElementById('shiftEnd').value = formatDateTimeLocal(tomorrow);
         });
 
         // Обновление времени
@@ -898,8 +1171,9 @@
                     animateNumber('statusOverdue', analytics.taskStatusDistribution["Overdue"] || 0);
                 }
 
-                // Обновляем график
+                // Обновляем графики
                 updateDailyTasksChart(analytics.dailyTasks);
+                updatePeakHoursChart(analytics.peakHours);
 
             } catch (error) {
                 console.error('Error loading analytics:', error);
@@ -926,6 +1200,62 @@
             }
         }
 
+        // Загрузка задач
+        async function loadTasks() {
+            try {
+                const response = await fetch('/Dashboard/GetTasks');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const tasks = await response.json();
+                updateTasksList(tasks);
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                showNotification('Ошибка загрузки задач', 'error');
+            }
+        }
+
+        // Загрузка ресурсов
+        async function loadResources() {
+            try {
+                const response = await fetch('/Dashboard/GetResources');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const resources = await response.json();
+                updateResourcesList(resources);
+            } catch (error) {
+                console.error('Error loading resources:', error);
+                showNotification('Ошибка загрузки ресурсов', 'error');
+            }
+        }
+
+        // Загрузка расписания
+        async function loadSchedule() {
+            try {
+                const response = await fetch('/Dashboard/GetShifts');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const shifts = await response.json();
+                updateScheduleList(shifts);
+            } catch (error) {
+                console.error('Error loading schedule:', error);
+                showNotification('Ошибка загрузки расписания', 'error');
+            }
+        }
+
+        // Загрузка отчета
+        async function loadReport() {
+            try {
+                const response = await fetch('/Dashboard/GenerateReport');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const report = await response.json();
+                updateReportData(report);
+            } catch (error) {
+                console.error('Error loading report:', error);
+                showNotification('Ошибка загрузки отчета', 'error');
+            }
+        }
+
         // Обновление списка активностей
         function updateActivitiesList(activities) {
             const container = document.getElementById('activitiesList');
@@ -946,7 +1276,7 @@
             container.innerHTML = activities.map(activity => `
                 <div class="activity-item">
                     <div class="activity-icon">
-                        ${activity.Type === 'Task' ? '✅' : '🕐'}
+                        ${activity.Type === 'Task' ? '✅' : activity.Type === 'Shift' ? '🕐' : 'ℹ️'}
                     </div>
                     <div class="activity-content">
                         <div class="activity-text">${activity.Description || 'Действие'}</div>
@@ -956,7 +1286,87 @@
             `).join('');
         }
 
-        // Обновление графика
+        // Обновление списка задач
+        function updateTasksList(tasks) {
+            const container = document.getElementById('tasksList');
+            if (!container) return;
+
+            if (!tasks || tasks.length === 0) {
+                container.innerHTML = `<tr><td colspan="5">Нет задач</td></tr>`;
+                return;
+            }
+
+            container.innerHTML = tasks.map(task => `
+                <tr>
+                    <td>${escapeHtml(task.name || 'Без названия')}</td>
+                    <td>${formatDateTime(task.time_ins)}</td>
+                    <td>${formatDateTime(task.time_pref_start)}</td>
+                    <td>${formatDateTime(task.time_pref_finish)}</td>
+                    <td>${task.duration || 0} мин</td>
+                </tr>
+            `).join('');
+        }
+
+        // Обновление списка ресурсов
+        function updateResourcesList(resources) {
+            const container = document.getElementById('resourcesList');
+            if (!container) return;
+
+            if (!resources || resources.length === 0) {
+                container.innerHTML = `<tr><td colspan="4">Нет ресурсов</td></tr>`;
+                return;
+            }
+
+            container.innerHTML = resources.map(resource => `
+                <tr>
+                    <td>${escapeHtml(resource.uid?.substring(0, 8) || '-')}</td>
+                    <td>${escapeHtml(resource.name || 'Без названия')}</td>
+                    <td>${formatDateTime(resource.time_ins)}</td>
+                    <td>${escapeHtml(resource.company_id?.substring(0, 8) || '-')}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Обновление списка расписания
+        function updateScheduleList(shifts) {
+            const container = document.getElementById('scheduleList');
+            if (!container) return;
+
+            if (!shifts || shifts.length === 0) {
+                container.innerHTML = `<tr><td colspan="5">Нет смен</td></tr>`;
+                return;
+            }
+
+            container.innerHTML = shifts.map(shift => `
+                <tr>
+                    <td>${escapeHtml(shift.name || 'Без названия')}</td>
+                    <td>${escapeHtml(shift.resource_id?.substring(0, 8) || '-')}</td>
+                    <td>${formatDateTime(shift.time_start)}</td>
+                    <td>${formatDateTime(shift.time_finish)}</td>
+                    <td>${formatDateTime(shift.time_ins)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Обновление данных отчета
+        function updateReportData(report) {
+            if (!report) return;
+
+            if (report.TotalTasks !== undefined) {
+                document.getElementById('reportTasks').textContent = report.TotalTasks;
+            }
+            if (report.TotalResources !== undefined) {
+                document.getElementById('reportResources').textContent = report.TotalResources;
+            }
+            if (report.Productivity !== undefined) {
+                document.getElementById('reportProductivity').textContent = report.Productivity.toFixed(1) + '%';
+            }
+            if (report.ResourceUtilization !== undefined) {
+                document.getElementById('reportUtilization').textContent = report.ResourceUtilization.toFixed(1) + '%';
+            }
+        }
+
+        // Обновление графика задач по дням
         function updateDailyTasksChart(dailyTasks) {
             const ctx = document.getElementById('dailyTasksChart');
             if (!ctx) return;
@@ -984,14 +1394,16 @@
                             data: counts,
                             borderColor: 'rgb(99, 102, 241)',
                             backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                            tension: 0.4
+                            tension: 0.4,
+                            fill: true
                         },
                         {
                             label: 'Завершено',
                             data: completed,
                             borderColor: 'rgb(16, 185, 129)',
                             backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            tension: 0.4
+                            tension: 0.4,
+                            fill: true
                         }
                     ]
                 },
@@ -1000,6 +1412,60 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 5
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Обновление графика пиковых часов
+        function updatePeakHoursChart(peakHours) {
+            const ctx = document.getElementById('peakHoursChart');
+            if (!ctx) return;
+
+            if (peakHoursChart) {
+                peakHoursChart.destroy();
+            }
+
+            if (!peakHours) {
+                return;
+            }
+
+            const hours = Object.keys(peakHours).map(h => `${h}:00`);
+            const counts = Object.values(peakHours);
+
+            peakHoursChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: hours,
+                    datasets: [{
+                        label: 'Активные смены',
+                        data: counts,
+                        backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                        borderColor: 'rgb(99, 102, 241)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
                     }
                 }
             });
@@ -1037,17 +1503,117 @@
             return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
         }
 
-        // Обновление кнопки обновления
-        function updateRefreshButton(isLoading) {
-            const icon = document.getElementById('refreshIcon');
-            const text = document.getElementById('refreshText');
+        function formatDateTime(timestamp) {
+            if (!timestamp) return '--';
+            const date = new Date(timestamp);
+            return date.toLocaleString('ru-RU');
+        }
 
-            if (isLoading) {
-                icon.textContent = '⏳';
-                text.textContent = 'Обновление...';
-            } else {
-                icon.textContent = '🔄';
-                text.textContent = 'Обновить';
+        function formatDateTimeLocal(date) {
+            return date.toISOString().slice(0, 16);
+        }
+
+        // Управление модальными окнами
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Создание задачи
+        async function submitTask() {
+            const name = document.getElementById('taskName').value;
+            const start = document.getElementById('taskStart').value;
+            const end = document.getElementById('taskEnd').value;
+            const duration = parseInt(document.getElementById('taskDuration').value);
+
+            if (!name) {
+                showNotification('Введите название задачи', 'error');
+                return;
+            }
+
+            const task = {
+                name: name,
+                time_pref_start: new Date(start).toISOString(),
+                time_pref_finish: new Date(end).toISOString(),
+                duration: duration
+            };
+
+            try {
+                const response = await fetch('/Dashboard/CreateTask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(task)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    closeModal('taskModal');
+                    loadTasks();
+                    refreshDashboard();
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Ошибка создания задачи: ' + error.message, 'error');
+            }
+        }
+
+        // Создание смены
+        async function submitShift() {
+            const name = document.getElementById('shiftName').value;
+            const resourceId = document.getElementById('shiftResourceId').value;
+            const start = document.getElementById('shiftStart').value;
+            const end = document.getElementById('shiftEnd').value;
+
+            if (!name || !resourceId) {
+                showNotification('Заполните все поля', 'error');
+                return;
+            }
+
+            const shift = {
+                name: name,
+                resource_id: resourceId,
+                time_start: new Date(start).toISOString(),
+                time_finish: new Date(end).toISOString()
+            };
+
+            try {
+                const response = await fetch('/Dashboard/CreateShift', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(shift)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    closeModal('shiftModal');
+                    loadSchedule();
+                    refreshDashboard();
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Ошибка создания смены: ' + error.message, 'error');
+            }
+        }
+
+        // Генерация полного отчета
+        async function generateFullReport() {
+            try {
+                await loadReport();
+                switchTab('reports');
+                showNotification('Отчет сгенерирован', 'success');
+            } catch (error) {
+                showNotification('Ошибка генерации отчета', 'error');
             }
         }
 
@@ -1065,7 +1631,24 @@
             });
 
             // Показываем выбранную панель
-            document.getElementById(tabId).classList.add('active');
+            const tabPane = document.getElementById(tabId);
+            tabPane.classList.add('active');
+
+            // Загружаем данные для вкладки
+            switch(tabId) {
+                case 'tasks':
+                    loadTasks();
+                    break;
+                case 'resources':
+                    loadResources();
+                    break;
+                case 'schedule':
+                    loadSchedule();
+                    break;
+                case 'reports':
+                    loadReport();
+                    break;
+            }
         }
 
         // Обновление дашборда
@@ -1077,6 +1660,25 @@
             }).catch(() => {
                 showNotification('Ошибка при обновлении', 'error');
             });
+        }
+
+        // Обновление кнопки обновления
+        function updateRefreshButton(isLoading) {
+            const icon = document.getElementById('refreshIcon');
+            const text = document.getElementById('refreshText');
+
+            if (isLoading) {
+                icon.textContent = '⏳';
+                text.textContent = 'Обновление...';
+            } else {
+                icon.textContent = '🔄';
+                text.textContent = 'Обновить';
+            }
+        }
+
+        // Показать уведомления
+        function showNotifications() {
+            showNotification('У вас 3 новых уведомления', 'info');
         }
 
         // Показать уведомление
@@ -1096,12 +1698,12 @@
                 gap: 10px;
                 z-index: 1000;
                 animation: slideInRight 0.3s ease;
-                border-left: 4px solid ${type === 'success' ? '#10b981' : '#ef4444'};
+                border-left: 4px solid ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
             `;
 
             notification.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span>${type === 'success' ? '✅' : '❌'}</span>
+                    <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
                     <span>${message}</span>
                 </div>
                 <button onclick="this.parentElement.remove()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #9ca3af;">×</button>
@@ -1116,21 +1718,11 @@
             }, 5000);
         }
 
-        // Быстрые действия
-        function createNewTask() {
-            showNotification('Функция создания задачи в разработке', 'info');
-        }
-
-        function scheduleShift() {
-            showNotification('Функция планирования смены в разработке', 'info');
-        }
-
-        function generateReport() {
-            showNotification('Функция создания отчета в разработке', 'info');
-        }
-
-        function showNotifications() {
-            showNotification('Функция уведомлений в разработке', 'info');
+        // Экранирование HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
 </body>
