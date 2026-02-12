@@ -18,14 +18,14 @@ namespace PlannerApi.Controllers
         }
 
         [HttpGet(Name = "GetShifts")]
-        public IEnumerable<Models.Shift> Get()
+        public IEnumerable<Models.WorkShift> Get()
         {
             using var db = new Models.ConnectToDb(_configuration);
             return db.GetShifts().ToArray();
         }
 
         [HttpPut(Name = "PutShift")]
-        public bool Put(Models.Shift shift)
+        public bool Put(Models.WorkShift shift)
         {
             using var db = new Models.ConnectToDb(_configuration);
             return db.PutShift(shift);
@@ -55,7 +55,7 @@ namespace PlannerApi.Controllers
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    var shift = new Models.Shift();
+                    var shift = new Models.WorkShift();
                     shift.name = res.name + " " + i.ToString() + " " + i.ToString();
                     shift.time_ins = time_ins;
                     shift.uid = Guid.NewGuid();

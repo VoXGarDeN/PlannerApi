@@ -18,14 +18,14 @@ namespace PlannerApi.Controllers
         }
 
         [HttpGet(Name = "GetTasks")]
-        public IEnumerable<Models.Task> Get()
+        public IEnumerable<Models.TaskItem> Get()
         {
             using var db = new Models.ConnectToDb(_configuration);
             return db.GetTasks().ToArray();
         }
 
         [HttpPut(Name = "PutTask")]
-        public bool Put(Models.Task task)
+        public bool Put(Models.TaskItem task)
         {
             using var db = new Models.ConnectToDb(_configuration);
             return db.PutTask(task);
@@ -52,7 +52,7 @@ namespace PlannerApi.Controllers
             using var db = new Models.ConnectToDb(_configuration);
             for (int i = 0; i < 10; i++)
             {
-                var task = new Models.Task();
+                var task = new Models.TaskItem();
                 task.company_id = company_id;
                 task.name = i.ToString() + " " + i.ToString() + " " + i.ToString();
                 task.time_ins = time_ins;

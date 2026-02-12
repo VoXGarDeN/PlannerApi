@@ -52,29 +52,29 @@ namespace PlannerApi.Models
             }
         }
 
-        public IEnumerable<Task> GetTasks()
+        public IEnumerable<TaskItem> GetTasks()
         {
             try
             {
-                return GetConnection().Query<Task>("SELECT * FROM task ORDER BY time_ins DESC");
+                return GetConnection().Query<TaskItem>("SELECT * FROM task ORDER BY time_ins DESC");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting tasks: {ex.Message}");
-                return new List<Task>();
+                return new List<TaskItem>();
             }
         }
 
-        public IEnumerable<Shift> GetShifts()
+        public IEnumerable<WorkShift> GetShifts()
         {
             try
             {
-                return GetConnection().Query<Shift>("SELECT * FROM shift ORDER BY time_ins DESC");
+                return GetConnection().Query<WorkShift>("SELECT * FROM shift ORDER BY time_ins DESC");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting shifts: {ex.Message}");
-                return new List<Shift>();
+                return new List<WorkShift>();
             }
         }
 
@@ -106,7 +106,7 @@ namespace PlannerApi.Models
             }
         }
 
-        public bool PutTask(Task task)
+        public bool PutTask(TaskItem task)
         {
             try
             {
@@ -121,7 +121,7 @@ namespace PlannerApi.Models
             }
         }
 
-        public bool PutShift(Shift shift)
+        public bool PutShift(WorkShift shift)
         {
             try
             {

@@ -388,6 +388,167 @@
             color: var(--gray);
         }
 
+        /* Notifications List */
+        .notifications-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid var(--gray-light);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+            .notification-item:hover {
+                background: rgba(99, 102, 241, 0.05);
+                border-radius: 8px;
+            }
+
+            .notification-item.unread {
+                background: rgba(59, 130, 246, 0.1);
+                border-left: 3px solid var(--info);
+            }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            font-size: 18px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-text {
+            font-size: 14px;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .notification-badge {
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            display: none;
+        }
+
+        .notification-item.unread .notification-badge {
+            display: block;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+            .data-table th {
+                background: var(--primary);
+                color: white;
+                padding: 12px;
+                text-align: left;
+                font-weight: 600;
+            }
+
+            .data-table td {
+                padding: 12px;
+                border-bottom: 1px solid var(--gray-light);
+            }
+
+            .data-table tr:hover {
+                background: var(--light);
+            }
+
+        /* Report Styles */
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .report-header {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .report-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 8px;
+        }
+
+        .stat-value-large {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label-small {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        /* Charts Container */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            height: 350px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
         /* Quick Actions */
         .quick-actions {
             background: white;
@@ -442,46 +603,6 @@
             font-weight: 600;
             color: var(--dark);
         }
-
-        .notification-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: var(--danger);
-            color: white;
-            font-size: 12px;
-            font-weight: 700;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Tables */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 16px;
-        }
-
-            .data-table th {
-                background: var(--primary);
-                color: white;
-                padding: 12px;
-                text-align: left;
-                font-weight: 600;
-            }
-
-            .data-table td {
-                padding: 12px;
-                border-bottom: 1px solid var(--gray-light);
-            }
-
-            .data-table tr:hover {
-                background: var(--light);
-            }
 
         /* Modal */
         .modal {
@@ -559,49 +680,53 @@
             cursor: pointer;
         }
 
-        /* Reports */
-        .report-card {
+        /* Notifications Panel */
+        .notification-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 380px;
+            height: 100vh;
             background: white;
-            border-radius: var(--radius);
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid var(--gray-light);
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
+            transition: right 0.3s ease;
+            padding: 24px;
+            overflow-y: auto;
         }
 
-        .report-title {
-            font-size: 16px;
+            .notification-panel.active {
+                right: 0;
+            }
+
+        .notification-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .notification-panel-title {
+            font-size: 18px;
             font-weight: 700;
-            margin-bottom: 12px;
             color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .report-data {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-        }
-
-        .report-item {
-            padding: 12px;
-            background: var(--light);
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .report-value {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        .report-label {
-            font-size: 12px;
+        .btn-close-panel {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
             color: var(--gray);
-            margin-top: 4px;
         }
 
-        /* Notifications */
-        .notification {
+        /* Notifications Popup */
+        .notification-popup {
             position: fixed;
             top: 20px;
             right: 20px;
@@ -617,9 +742,13 @@
             border-left: 4px solid var(--success);
         }
 
-        .notification-error {
-            border-left-color: var(--danger);
-        }
+            .notification-popup.error {
+                border-left-color: var(--danger);
+            }
+
+            .notification-popup.warning {
+                border-left-color: var(--warning);
+            }
 
         /* Animations */
         @@keyframes slideDown {
@@ -653,16 +782,6 @@
 
             to {
                 opacity: 1;
-            }
-        }
-
-        @@keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.05);
             }
         }
 
@@ -722,6 +841,14 @@
             .quick-stats {
                 grid-template-columns: 1fr;
             }
+
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -763,7 +890,8 @@
             </div>
             <div class="form-group">
                 <label class="form-label">ID ресурса</label>
-                <input type="text" id="shiftResourceId" class="form-input" placeholder="Введите ID ресурса">
+                <input type="text" id="shiftResourceId" class="form-input" placeholder="Введите ID ресурса (GUID)">
+                <small style="color: var(--gray); font-size: 12px;">Пример: 123e4567-e89b-12d3-a456-426614174000</small>
             </div>
             <div class="form-group">
                 <label class="form-label">Дата начала</label>
@@ -777,6 +905,20 @@
                 <button class="btn-primary" onclick="submitShift()">Создать</button>
                 <button class="btn-secondary" onclick="closeModal('shiftModal')">Отмена</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Панель уведомлений -->
+    <div id="notificationsPanel" class="notification-panel">
+        <div class="notification-panel-header">
+            <div class="notification-panel-title">🔔 Уведомления</div>
+            <button class="btn-close-panel" onclick="closeNotificationsPanel()">×</button>
+        </div>
+        <div class="notifications-list" id="notificationsList">
+            <!-- Уведомления загружаются динамически -->
+        </div>
+        <div style="margin-top: 20px; text-align: center;">
+            <button class="btn-secondary" onclick="markAllAsRead()">Отметить все как прочитанные</button>
         </div>
     </div>
 
@@ -795,6 +937,10 @@
                 <button class="btn-refresh" onclick="refreshDashboard()">
                     <span id="refreshIcon">🔄</span>
                     <span id="refreshText">Обновить</span>
+                </button>
+                <button class="btn-refresh" onclick="openNotificationsPanel()" style="position: relative;">
+                    <span>🔔</span>
+                    <span id="notificationCount" style="display: none; position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 12px; display: flex; align-items: center; justify-content: center;">0</span>
                 </button>
             </div>
         </div>
@@ -867,6 +1013,9 @@
                 <button class="tab-btn" data-tab="reports">
                     <span>📊</span> Отчеты
                 </button>
+                <button class="tab-btn" data-tab="notificationsTab">
+                    <span>🔔</span> Уведомления
+                </button>
             </div>
 
             <div class="tabs-content">
@@ -912,13 +1061,27 @@
 
                 <!-- Analytics Tab -->
                 <div class="tab-pane" id="analytics">
-                    <div class="overview-card">
-                        <h3 class="card-title">📊 Статистика по дням</h3>
-                        <canvas id="dailyTasksChart" style="height: 300px;"></canvas>
+                    <div class="charts-container">
+                        <div class="chart-card">
+                            <div class="chart-title">📊 Статистика по дням</div>
+                            <canvas id="dailyTasksChart" style="height: 280px;"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-title">📊 Пиковые часы</div>
+                            <canvas id="peakHoursChart" style="height: 280px;"></canvas>
+                        </div>
                     </div>
                     <div class="overview-card" style="margin-top: 20px;">
-                        <h3 class="card-title">📊 Пиковые часы</h3>
-                        <canvas id="peakHoursChart" style="height: 300px;"></canvas>
+                        <h3 class="card-title">📈 Производительность ресурсов</h3>
+                        <div id="resourcePerformance" style="height: 200px; overflow-y: auto;">
+                            <div class="performance-item">
+                                <div class="resource-name">Загрузка...</div>
+                                <div class="performance-bar">
+                                    <div class="bar-fill" style="width: 0%"></div>
+                                    <span class="performance-value">0%</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -988,30 +1151,70 @@
 
                 <!-- Reports Tab -->
                 <div class="tab-pane" id="reports">
-                    <div class="overview-card">
-                        <h3 class="card-title">📊 Отчеты</h3>
-                        <button class="btn-primary" onclick="generateFullReport()" style="margin-bottom: 16px;">📄 Сгенерировать отчет</button>
-                        <div id="reportsList">
-                            <div class="report-card">
-                                <div class="report-title">Общая статистика</div>
-                                <div class="report-data" id="reportData">
-                                    <div class="report-item">
-                                        <div class="report-value" id="reportTasks">0</div>
-                                        <div class="report-label">Всего задач</div>
-                                    </div>
-                                    <div class="report-item">
-                                        <div class="report-value" id="reportResources">0</div>
-                                        <div class="report-label">Ресурсов</div>
-                                    </div>
-                                    <div class="report-item">
-                                        <div class="report-value" id="reportProductivity">0%</div>
-                                        <div class="report-label">Продуктивность</div>
-                                    </div>
-                                    <div class="report-item">
-                                        <div class="report-value" id="reportUtilization">0%</div>
-                                        <div class="report-label">Утилизация</div>
-                                    </div>
+                    <div class="report-grid">
+                        <div class="report-card">
+                            <div class="report-header">📊 Общая статистика</div>
+                            <div class="report-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value-large" id="reportTotalTasks">0</div>
+                                    <div class="stat-label-small">Всего задач</div>
                                 </div>
+                                <div class="stat-item">
+                                    <div class="stat-value-large" id="reportTotalResources">0</div>
+                                    <div class="stat-label-small">Ресурсов</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value-large" id="reportProductivity">0%</div>
+                                    <div class="stat-label-small">Продуктивность</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value-large" id="reportUtilization">0%</div>
+                                    <div class="stat-label-small">Утилизация</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-card">
+                            <div class="report-header">📈 Статус задач</div>
+                            <div class="report-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value-large" id="reportActiveTasks">0</div>
+                                    <div class="stat-label-small">Активных</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value-large" id="reportCompletedTasks">0</div>
+                                    <div class="stat-label-small">Завершено</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value-large" id="reportCompletionRate">0%</div>
+                                    <div class="stat-label-small">Выполнение</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value-large" id="reportPeakTime">--:--</div>
+                                    <div class="stat-label-small">Пиковое время</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-card" style="grid-column: span 2;">
+                            <div class="report-header">📋 Распределение по статусам</div>
+                            <canvas id="statusDistributionChart" style="height: 250px; margin-top: 15px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Tab -->
+                <div class="tab-pane" id="notificationsTab">
+                    <div class="overview-card">
+                        <h3 class="card-title">🔔 Все уведомления</h3>
+                        <div class="notifications-list" id="allNotificationsList">
+                            <div class="notification-item loading">
+                                <div class="notification-icon">🔔</div>
+                                <div class="notification-content">
+                                    <div class="notification-text">Загрузка уведомлений...</div>
+                                    <div class="notification-time">--:--</div>
+                                </div>
+                                <div class="notification-badge"></div>
                             </div>
                         </div>
                     </div>
@@ -1035,9 +1238,10 @@
                     <div class="action-icon">📊</div>
                     <span class="action-text">Создать отчет</span>
                 </button>
-                <button class="action-btn btn-notifications" onclick="showNotifications()">
+                <button class="action-btn btn-notifications" onclick="openNotificationsPanel()">
                     <div class="action-icon">🔔</div>
                     <span class="action-text">Уведомления</span>
+                    <span id="quickNotificationCount" style="display: none; position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center;">0</span>
                 </button>
             </div>
         </div>
@@ -1045,16 +1249,19 @@
 
     <script>
         // Глобальные переменные
-        let statsChart = null;
+        let dailyTasksChart = null;
         let peakHoursChart = null;
+        let statusDistributionChart = null;
         let isRefreshing = false;
         let userName = '@ViewBag.UserName' || 'Пользователь';
+        let notifications = [];
 
         // Инициализация дашборда
         document.addEventListener('DOMContentLoaded', function() {
             updateClock();
             setInterval(updateClock, 1000);
             loadDashboardData();
+            loadNotifications();
 
             // Настройка переключения вкладок
             document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1106,7 +1313,7 @@
 
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
-                showNotification('Ошибка загрузки данных: ' + error.message, 'error');
+                showPopupNotification('Ошибка загрузки данных: ' + error.message, 'error');
             } finally {
                 isRefreshing = false;
                 updateRefreshButton(false);
@@ -1145,7 +1352,7 @@
 
             } catch (error) {
                 console.error('Error loading stats:', error);
-                showNotification('Ошибка загрузки статистики', 'error');
+                showPopupNotification('Ошибка загрузки статистики', 'error');
             }
         }
 
@@ -1174,6 +1381,7 @@
                 // Обновляем графики
                 updateDailyTasksChart(analytics.dailyTasks);
                 updatePeakHoursChart(analytics.peakHours);
+                updateResourcePerformance(analytics.resourcePerformance);
 
             } catch (error) {
                 console.error('Error loading analytics:', error);
@@ -1200,6 +1408,20 @@
             }
         }
 
+        // Загрузка уведомлений
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/Dashboard/GetNotifications');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                notifications = await response.json();
+                updateNotificationBadges();
+                updateAllNotificationsList();
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
         // Загрузка задач
         async function loadTasks() {
             try {
@@ -1210,7 +1432,7 @@
                 updateTasksList(tasks);
             } catch (error) {
                 console.error('Error loading tasks:', error);
-                showNotification('Ошибка загрузки задач', 'error');
+                showPopupNotification('Ошибка загрузки задач', 'error');
             }
         }
 
@@ -1224,7 +1446,7 @@
                 updateResourcesList(resources);
             } catch (error) {
                 console.error('Error loading resources:', error);
-                showNotification('Ошибка загрузки ресурсов', 'error');
+                showPopupNotification('Ошибка загрузки ресурсов', 'error');
             }
         }
 
@@ -1238,7 +1460,7 @@
                 updateScheduleList(shifts);
             } catch (error) {
                 console.error('Error loading schedule:', error);
-                showNotification('Ошибка загрузки расписания', 'error');
+                showPopupNotification('Ошибка загрузки расписания', 'error');
             }
         }
 
@@ -1252,7 +1474,7 @@
                 updateReportData(report);
             } catch (error) {
                 console.error('Error loading report:', error);
-                showNotification('Ошибка загрузки отчета', 'error');
+                showPopupNotification('Ошибка загрузки отчета', 'error');
             }
         }
 
@@ -1276,14 +1498,64 @@
             container.innerHTML = activities.map(activity => `
                 <div class="activity-item">
                     <div class="activity-icon">
-                        ${activity.Type === 'Task' ? '✅' : activity.Type === 'Shift' ? '🕐' : 'ℹ️'}
+                        ${getActivityIcon(activity.Type)}
                     </div>
                     <div class="activity-content">
-                        <div class="activity-text">${activity.Description || 'Действие'}</div>
+                        <div class="activity-text">${escapeHtml(activity.Description || 'Действие')}</div>
                         <div class="activity-time">${formatTime(activity.Timestamp)}</div>
                     </div>
                 </div>
             `).join('');
+        }
+
+        // Обновление списка уведомлений
+        function updateAllNotificationsList() {
+            const container = document.getElementById('allNotificationsList');
+            if (!container || !notifications) return;
+
+            if (notifications.length === 0) {
+                container.innerHTML = `
+                    <div class="notification-item">
+                        <div class="notification-icon">ℹ️</div>
+                        <div class="notification-content">
+                            <div class="notification-text">Нет уведомлений</div>
+                            <div class="notification-time">--:--</div>
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = notifications.map(notification => `
+                <div class="notification-item ${notification.IsRead ? '' : 'unread'}" onclick="markNotificationAsRead('${notification.Id}')">
+                    <div class="notification-icon">
+                        ${getNotificationIcon(notification.Type)}
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-text">${escapeHtml(notification.Message || 'Уведомление')}</div>
+                        <div class="notification-time">${formatTime(notification.Timestamp)}</div>
+                    </div>
+                    <div class="notification-badge"></div>
+                </div>
+            `).join('');
+        }
+
+        // Обновление бейджей уведомлений
+        function updateNotificationBadges() {
+            if (!notifications) return;
+
+            const unreadCount = notifications.filter(n => !n.IsRead).length;
+            const notificationCountElement = document.getElementById('notificationCount');
+            const quickNotificationCountElement = document.getElementById('quickNotificationCount');
+
+            if (unreadCount > 0) {
+                notificationCountElement.textContent = unreadCount;
+                notificationCountElement.style.display = 'flex';
+                quickNotificationCountElement.textContent = unreadCount;
+                quickNotificationCountElement.style.display = 'flex';
+            } else {
+                notificationCountElement.style.display = 'none';
+                quickNotificationCountElement.style.display = 'none';
+            }
         }
 
         // Обновление списка задач
@@ -1353,16 +1625,39 @@
             if (!report) return;
 
             if (report.TotalTasks !== undefined) {
-                document.getElementById('reportTasks').textContent = report.TotalTasks;
+                document.getElementById('reportTotalTasks').textContent = report.TotalTasks;
             }
             if (report.TotalResources !== undefined) {
-                document.getElementById('reportResources').textContent = report.TotalResources;
+                document.getElementById('reportTotalResources').textContent = report.TotalResources;
             }
-            if (report.Productivity !== undefined) {
-                document.getElementById('reportProductivity').textContent = report.Productivity.toFixed(1) + '%';
+            if (report.ProductivityScore !== undefined) {
+                document.getElementById('reportProductivity').textContent = report.ProductivityScore.toFixed(1) + '%';
             }
-            if (report.ResourceUtilization !== undefined) {
-                document.getElementById('reportUtilization').textContent = report.ResourceUtilization.toFixed(1) + '%';
+            if (report.ResourcesUtilization !== undefined) {
+                document.getElementById('reportUtilization').textContent = report.ResourcesUtilization.toFixed(1) + '%';
+            }
+            if (report.ActiveTasks !== undefined) {
+                document.getElementById('reportActiveTasks').textContent = report.ActiveTasks;
+            }
+            if (report.CompletedTasks !== undefined) {
+                document.getElementById('reportCompletedTasks').textContent = report.CompletedTasks;
+            }
+            if (report.TaskCompletionRate !== undefined) {
+                document.getElementById('reportCompletionRate').textContent = report.TaskCompletionRate.toFixed(1) + '%';
+            }
+            if (report.PeakActivityTime !== undefined) {
+                document.getElementById('reportPeakTime').textContent = report.PeakActivityTime;
+            }
+
+            // Обновляем график распределения статусов
+            if (report.TasksByStatus && statusDistributionChart) {
+                statusDistributionChart.data.datasets[0].data = [
+                    report.TasksByStatus["Not Started"] || 0,
+                    report.TasksByStatus["In Progress"] || 0,
+                    report.TasksByStatus["Completed"] || 0,
+                    report.TasksByStatus["Overdue"] || 0
+                ];
+                statusDistributionChart.update();
             }
         }
 
@@ -1371,12 +1666,12 @@
             const ctx = document.getElementById('dailyTasksChart');
             if (!ctx) return;
 
-            if (statsChart) {
-                statsChart.destroy();
+            if (dailyTasksChart) {
+                dailyTasksChart.destroy();
             }
 
             if (!dailyTasks) {
-                ctx.parentElement.innerHTML = '<p>Нет данных для графика</p>';
+                ctx.parentElement.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 20px;">Нет данных для графика</p>';
                 return;
             }
 
@@ -1384,7 +1679,7 @@
             const counts = dates.map(date => dailyTasks[date]?.Count || 0);
             const completed = dates.map(date => dailyTasks[date]?.Completed || 0);
 
-            statsChart = new Chart(ctx, {
+            dailyTasksChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: dates,
@@ -1395,7 +1690,8 @@
                             borderColor: 'rgb(99, 102, 241)',
                             backgroundColor: 'rgba(99, 102, 241, 0.1)',
                             tension: 0.4,
-                            fill: true
+                            fill: true,
+                            borderWidth: 2
                         },
                         {
                             label: 'Завершено',
@@ -1403,7 +1699,8 @@
                             borderColor: 'rgb(16, 185, 129)',
                             backgroundColor: 'rgba(16, 185, 129, 0.1)',
                             tension: 0.4,
-                            fill: true
+                            fill: true,
+                            borderWidth: 2
                         }
                     ]
                 },
@@ -1411,13 +1708,37 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'top' }
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                stepSize: 5
+                                stepSize: 5,
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 11
+                                },
+                                maxRotation: 45
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
                             }
                         }
                     }
@@ -1434,20 +1755,51 @@
                 peakHoursChart.destroy();
             }
 
-            if (!peakHours) {
+            if (!peakHours || Object.keys(peakHours).length === 0) {
+                // Создаем демо-данные
+                const hours = Array.from({length: 24}, (_, i) => i);
+                const demoData = hours.map(h => h >= 8 && h <= 17 ? Math.floor(Math.random() * 10) + 5 : Math.floor(Math.random() * 3));
+
+                peakHoursChart = createBarChart(ctx, hours.map(h => `${h}:00`), demoData, 'Активные смены');
                 return;
             }
 
             const hours = Object.keys(peakHours).map(h => `${h}:00`);
             const counts = Object.values(peakHours);
 
-            peakHoursChart = new Chart(ctx, {
+            peakHoursChart = createBarChart(ctx, hours, counts, 'Активные смены');
+        }
+
+        // Обновление производительности ресурсов
+        function updateResourcePerformance(performance) {
+            const container = document.getElementById('resourcePerformance');
+            if (!container) return;
+
+            if (!performance || Object.keys(performance).length === 0) {
+                container.innerHTML = '<div class="performance-item"><div class="resource-name">Нет данных о ресурсах</div></div>';
+                return;
+            }
+
+            container.innerHTML = Object.entries(performance).map(([name, value]) => `
+                <div class="performance-item">
+                    <div class="resource-name">${escapeHtml(name)}</div>
+                    <div class="performance-bar">
+                        <div class="bar-fill" style="width: ${value}%"></div>
+                        <span class="performance-value">${value.toFixed(1)}%</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Создание гистограммы
+        function createBarChart(ctx, labels, data, label) {
+            return new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: hours,
+                    labels: labels,
                     datasets: [{
-                        label: 'Активные смены',
-                        data: counts,
+                        label: label,
+                        data: data,
                         backgroundColor: 'rgba(99, 102, 241, 0.8)',
                         borderColor: 'rgb(99, 102, 241)',
                         borderWidth: 1
@@ -1457,13 +1809,81 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'top' }
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                stepSize: 1
+                                stepSize: 2,
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 11
+                                },
+                                maxRotation: 45
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Создание графика распределения статусов
+        function createStatusDistributionChart(statusData) {
+            const ctx = document.getElementById('statusDistributionChart');
+            if (!ctx) return;
+
+            if (statusDistributionChart) {
+                statusDistributionChart.destroy();
+            }
+
+            const labels = ['Не начато', 'В процессе', 'Завершено', 'Просрочено'];
+            const backgroundColors = [
+                'rgba(156, 163, 175, 0.8)',
+                'rgba(245, 158, 11, 0.8)',
+                'rgba(16, 185, 129, 0.8)',
+                'rgba(239, 68, 68, 0.8)'
+            ];
+
+            statusDistributionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: statusData,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 12
+                                }
                             }
                         }
                     }
@@ -1513,6 +1933,29 @@
             return date.toISOString().slice(0, 16);
         }
 
+        // Получение иконок
+        function getActivityIcon(type) {
+            const icons = {
+                'Task': '✅',
+                'Shift': '🕐',
+                'Schedule': '📅',
+                'System': '⚙️',
+                'Info': 'ℹ️'
+            };
+            return icons[type] || '📝';
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                'Task': '✅',
+                'Info': 'ℹ️',
+                'System': '⚙️',
+                'Warning': '⚠️',
+                'Error': '❌'
+            };
+            return icons[type] || '🔔';
+        }
+
         // Управление модальными окнами
         function openModal(modalId) {
             document.getElementById(modalId).style.display = 'flex';
@@ -1520,6 +1963,49 @@
 
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Управление панелью уведомлений
+        function openNotificationsPanel() {
+            document.getElementById('notificationsPanel').classList.add('active');
+            updateNotificationsPanel();
+        }
+
+        function closeNotificationsPanel() {
+            document.getElementById('notificationsPanel').classList.remove('active');
+        }
+
+        function updateNotificationsPanel() {
+            const panelList = document.getElementById('notificationsList');
+            if (!panelList || !notifications) return;
+
+            if (notifications.length === 0) {
+                panelList.innerHTML = `
+                    <div class="notification-item">
+                        <div class="notification-icon">ℹ️</div>
+                        <div class="notification-content">
+                            <div class="notification-text">Нет уведомлений</div>
+                            <div class="notification-time">--:--</div>
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            // Показываем только 5 последних уведомлений в панели
+            const recentNotifications = notifications.slice(0, 5);
+
+            panelList.innerHTML = recentNotifications.map(notification => `
+                <div class="notification-item ${notification.IsRead ? '' : 'unread'}" onclick="markNotificationAsRead('${notification.Id}')">
+                    <div class="notification-icon">
+                        ${getNotificationIcon(notification.Type)}
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-text">${escapeHtml(notification.Message || 'Уведомление')}</div>
+                        <div class="notification-time">${formatTime(notification.Timestamp)}</div>
+                    </div>
+                    <div class="notification-badge"></div>
+                </div>
+            `).join('');
         }
 
         // Создание задачи
@@ -1530,7 +2016,7 @@
             const duration = parseInt(document.getElementById('taskDuration').value);
 
             if (!name) {
-                showNotification('Введите название задачи', 'error');
+                showPopupNotification('Введите название задачи', 'error');
                 return;
             }
 
@@ -1552,15 +2038,20 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    showNotification(result.message, 'success');
+                    showPopupNotification(result.message, 'success');
                     closeModal('taskModal');
+                    // Сброс формы
+                    document.getElementById('taskName').value = '';
+                    document.getElementById('taskDuration').value = 60;
+
+                    // Обновление данных
                     loadTasks();
                     refreshDashboard();
                 } else {
-                    showNotification(result.message, 'error');
+                    showPopupNotification(result.message, 'error');
                 }
             } catch (error) {
-                showNotification('Ошибка создания задачи: ' + error.message, 'error');
+                showPopupNotification('Ошибка создания задачи: ' + error.message, 'error');
             }
         }
 
@@ -1572,7 +2063,14 @@
             const end = document.getElementById('shiftEnd').value;
 
             if (!name || !resourceId) {
-                showNotification('Заполните все поля', 'error');
+                showPopupNotification('Заполните все обязательные поля', 'error');
+                return;
+            }
+
+            // Проверка GUID формата
+            const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            if (!guidRegex.test(resourceId)) {
+                showPopupNotification('Введите корректный ID ресурса (формат GUID)', 'error');
                 return;
             }
 
@@ -1594,16 +2092,42 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    showNotification(result.message, 'success');
+                    showPopupNotification(result.message, 'success');
                     closeModal('shiftModal');
+                    // Сброс формы
+                    document.getElementById('shiftName').value = '';
+                    document.getElementById('shiftResourceId').value = '';
+
+                    // Обновление данных
                     loadSchedule();
                     refreshDashboard();
                 } else {
-                    showNotification(result.message, 'error');
+                    showPopupNotification(result.message, 'error');
                 }
             } catch (error) {
-                showNotification('Ошибка создания смены: ' + error.message, 'error');
+                showPopupNotification('Ошибка создания смены: ' + error.message, 'error');
             }
+        }
+
+        // Отметить уведомление как прочитанное
+        function markNotificationAsRead(notificationId) {
+            const notification = notifications.find(n => n.Id === notificationId);
+            if (notification && !notification.IsRead) {
+                notification.IsRead = true;
+                updateNotificationBadges();
+                updateAllNotificationsList();
+                updateNotificationsPanel();
+            }
+        }
+
+        // Отметить все уведомления как прочитанные
+        function markAllAsRead() {
+            notifications.forEach(notification => {
+                notification.IsRead = true;
+            });
+            updateNotificationBadges();
+            updateAllNotificationsList();
+            updateNotificationsPanel();
         }
 
         // Генерация полного отчета
@@ -1611,9 +2135,21 @@
             try {
                 await loadReport();
                 switchTab('reports');
-                showNotification('Отчет сгенерирован', 'success');
+                showPopupNotification('Отчет сгенерирован', 'success');
+
+                // Инициализация графика распределения статусов
+                const report = await fetch('/Dashboard/GenerateReport').then(r => r.json());
+                if (report.TasksByStatus) {
+                    const statusData = [
+                        report.TasksByStatus["Not Started"] || 0,
+                        report.TasksByStatus["In Progress"] || 0,
+                        report.TasksByStatus["Completed"] || 0,
+                        report.TasksByStatus["Overdue"] || 0
+                    ];
+                    createStatusDistributionChart(statusData);
+                }
             } catch (error) {
-                showNotification('Ошибка генерации отчета', 'error');
+                showPopupNotification('Ошибка генерации отчета', 'error');
             }
         }
 
@@ -1646,7 +2182,10 @@
                     loadSchedule();
                     break;
                 case 'reports':
-                    loadReport();
+                    generateFullReport();
+                    break;
+                case 'notificationsTab':
+                    loadNotifications();
                     break;
             }
         }
@@ -1656,9 +2195,9 @@
             if (isRefreshing) return;
 
             loadDashboardData().then(() => {
-                showNotification('Дашборд обновлен', 'success');
+                showPopupNotification('Дашборд обновлен', 'success');
             }).catch(() => {
-                showNotification('Ошибка при обновлении', 'error');
+                showPopupNotification('Ошибка при обновлении', 'error');
             });
         }
 
@@ -1676,15 +2215,10 @@
             }
         }
 
-        // Показать уведомления
-        function showNotifications() {
-            showNotification('У вас 3 новых уведомления', 'info');
-        }
-
-        // Показать уведомление
-        function showNotification(message, type = 'info') {
+        // Показать всплывающее уведомление
+        function showPopupNotification(message, type = 'info') {
             const notification = document.createElement('div');
-            notification.className = `notification ${type === 'error' ? 'notification-error' : ''}`;
+            notification.className = `notification-popup ${type}`;
             notification.style.cssText = `
                 position: fixed;
                 top: 20px;
@@ -1698,12 +2232,12 @@
                 gap: 10px;
                 z-index: 1000;
                 animation: slideInRight 0.3s ease;
-                border-left: 4px solid ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                border-left: 4px solid ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
             `;
 
             notification.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                    <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}</span>
                     <span>${message}</span>
                 </div>
                 <button onclick="this.parentElement.remove()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #9ca3af;">×</button>
@@ -1720,10 +2254,17 @@
 
         // Экранирование HTML
         function escapeHtml(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
+
+        // Инициализация графика распределения статусов при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            // Создаем пустой график при загрузке
+            createStatusDistributionChart([0, 0, 0, 0]);
+        });
     </script>
 </body>
 </html>

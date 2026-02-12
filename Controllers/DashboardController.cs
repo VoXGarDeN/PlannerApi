@@ -152,7 +152,7 @@ namespace PlannerApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting tasks");
-                return Json(new List<Models.Task>());
+                return Json(new List<Models.TaskItem>());
             }
         }
 
@@ -184,7 +184,7 @@ namespace PlannerApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting shifts");
-                return Json(new List<Models.Shift>());
+                return Json(new List<Models.WorkShift>());
             }
         }
 
@@ -205,7 +205,7 @@ namespace PlannerApi.Controllers
         }
 
         [HttpPost("CreateTask")]
-        public IActionResult CreateTask([FromBody] Models.Task task)
+        public IActionResult CreateTask([FromBody] Models.TaskItem task)
         {
             try
             {
@@ -225,14 +225,14 @@ namespace PlannerApi.Controllers
         }
 
         [HttpPost("CreateShift")]
-        public IActionResult CreateShift([FromBody] Models.Shift shift)
+        public IActionResult CreateShift([FromBody] Models.WorkShift shift)
         {
             try
             {
                 using var db = new Models.ConnectToDb(_configuration);
                 shift.uid = Guid.NewGuid();
                 shift.time_ins = DateTime.UtcNow;
-                shift.time_free = null; // Добавляем это поле
+                shift.time_free = null;
 
                 bool success = db.PutShift(shift);
                 return Json(new { success, message = success ? "Смена создана" : "Ошибка создания смены" });
@@ -302,9 +302,9 @@ namespace PlannerApi.Controllers
         {
             try
             {
-                var tasks = db.GetTasks()?.ToList() ?? new List<Models.Task>();
+                var tasks = db.GetTasks()?.ToList() ?? new List<Models.TaskItem>();
                 var resources = db.GetResources()?.ToList() ?? new List<Models.Resource>();
-                var shifts = db.GetShifts()?.ToList() ?? new List<Models.Shift>();
+                var shifts = db.GetShifts()?.ToList() ?? new List<Models.WorkShift>();
                 var shiftTasks = db.GetShiftTasks()?.ToList() ?? new List<Models.ShiftTask>();
 
                 var now = DateTime.UtcNow;
@@ -331,7 +331,7 @@ namespace PlannerApi.Controllers
                 _logger.LogError(ex, "Error getting dashboard stats");
                 return new Models.DashboardStats
                 {
-                    TotalTasks = 5, // Демо-данные
+                    TotalTasks = 5,
                     ActiveTasks = 2,
                     CompletedTasks = 3,
                     TotalResources = 4,
@@ -346,8 +346,8 @@ namespace PlannerApi.Controllers
         {
             try
             {
-                var tasks = db.GetTasks()?.ToList() ?? new List<Models.Task>();
-                var shifts = db.GetShifts()?.ToList() ?? new List<Models.Shift>();
+                var tasks = db.GetTasks()?.ToList() ?? new List<Models.TaskItem>();
+                var shifts = db.GetShifts()?.ToList() ?? new List<Models.WorkShift>();
                 var shiftTasks = db.GetShiftTasks()?.ToList() ?? new List<Models.ShiftTask>();
 
                 // Создаем демо-данные для графиков если нет реальных
@@ -364,7 +364,6 @@ namespace PlannerApi.Controllers
                     var count = tasks.Count(t => t.time_ins.Date == date);
                     var completed = tasks.Count(t => t.time_pref_finish.Date == date && t.time_pref_finish < DateTime.UtcNow);
 
-                    // Если данных нет, создаем демо-данные
                     if (tasks.Count == 0)
                     {
                         count = random.Next(5, 20);
@@ -376,7 +375,6 @@ namespace PlannerApi.Controllers
 
                 var resourcePerformance = CalculateResourcePerformance(db);
 
-                // Создаем демо-распределение статусов
                 var statusDistribution = new Dictionary<string, int>
                 {
                     ["Not Started"] = tasks.Count > 0 ? tasks.Count(t => t.time_pref_start > DateTime.UtcNow) : random.Next(5, 15),
@@ -401,7 +399,6 @@ namespace PlannerApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting analytics data");
-                // Возвращаем демо-данные
                 var random = new Random();
                 var demoDailyTasks = new Dictionary<string, Models.DailyTaskData>();
                 for (int i = 0; i < 30; i++)
@@ -442,7 +439,6 @@ namespace PlannerApi.Controllers
             {
                 var activities = new List<Models.Activity>();
 
-                // Получаем реальные задачи
                 var recentTasks = db.GetTasks()
                     ?.OrderByDescending(t => t.time_ins)
                     .Take(5)
@@ -455,7 +451,6 @@ namespace PlannerApi.Controllers
                         User = "System"
                     }) ?? new List<Models.Activity>();
 
-                // Получаем реальные смены
                 var recentShifts = db.GetShifts()
                     ?.OrderByDescending(s => s.time_ins)
                     .Take(5)
@@ -468,7 +463,6 @@ namespace PlannerApi.Controllers
                         User = "System"
                     }) ?? new List<Models.Activity>();
 
-                // Получаем реальные задачи смен
                 var recentShiftTasks = db.GetShiftTasks()
                     ?.OrderByDescending(st => st.time_ins)
                     .Take(3)
@@ -485,7 +479,6 @@ namespace PlannerApi.Controllers
                 activities.AddRange(recentShifts);
                 activities.AddRange(recentShiftTasks);
 
-                // Если нет реальных данных, добавляем демо
                 if (activities.Count == 0)
                 {
                     var now = DateTime.UtcNow;
@@ -531,7 +524,6 @@ namespace PlannerApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting recent activities");
-                // Возвращаем демо-активности
                 var now = DateTime.UtcNow;
                 return new List<Models.Activity>
                 {
@@ -563,9 +555,9 @@ namespace PlannerApi.Controllers
             }
         }
 
-        private float CalculateProductivityScore(List<Models.Task> tasks, List<Models.ShiftTask> shiftTasks)
+        private float CalculateProductivityScore(List<Models.TaskItem> tasks, List<Models.ShiftTask> shiftTasks)
         {
-            if (tasks.Count == 0) return 75.5f; // Демо-значение
+            if (tasks.Count == 0) return 75.5f;
 
             var completedTasks = tasks.Count(t => t.time_pref_finish < DateTime.UtcNow);
             var scheduledTasks = shiftTasks.Count;
@@ -574,9 +566,9 @@ namespace PlannerApi.Controllers
                    (float)scheduledTasks / tasks.Count * 100) / 2;
         }
 
-        private float CalculateUtilization(List<Models.Resource> resources, List<Models.Shift> shifts, List<Models.ShiftTask> shiftTasks)
+        private float CalculateUtilization(List<Models.Resource> resources, List<Models.WorkShift> shifts, List<Models.ShiftTask> shiftTasks)
         {
-            if (resources.Count == 0) return 65.2f; // Демо-значение
+            if (resources.Count == 0) return 65.2f;
 
             var utilizedResources = resources.Count(r =>
                 shifts.Any(s => s.resource_id == r.uid) &&
@@ -588,8 +580,8 @@ namespace PlannerApi.Controllers
         private Dictionary<string, float> CalculateResourcePerformance(Models.ConnectToDb db)
         {
             var resources = db.GetResources()?.ToList() ?? new List<Models.Resource>();
-            var shifts = db.GetShifts()?.ToList() ?? new List<Models.Shift>();
-            var tasks = db.GetTasks()?.ToList() ?? new List<Models.Task>();
+            var shifts = db.GetShifts()?.ToList() ?? new List<Models.WorkShift>();
+            var tasks = db.GetTasks()?.ToList() ?? new List<Models.TaskItem>();
             var shiftTasks = db.GetShiftTasks()?.ToList() ?? new List<Models.ShiftTask>();
 
             var performance = new Dictionary<string, float>();
@@ -629,7 +621,7 @@ namespace PlannerApi.Controllers
             return performance;
         }
 
-        private Dictionary<int, int> CalculatePeakHours(List<Models.Shift> shifts)
+        private Dictionary<int, int> CalculatePeakHours(List<Models.WorkShift> shifts)
         {
             var hourlyCounts = new Dictionary<int, int>();
             var random = new Random();
@@ -639,7 +631,6 @@ namespace PlannerApi.Controllers
                 var count = shifts.Count(s =>
                     s.time_start.Hour <= hour && s.time_finish.Hour >= hour);
 
-                // Демо-данные для графика
                 if (shifts.Count == 0)
                 {
                     count = hour >= 8 && hour <= 17 ? random.Next(5, 15) : random.Next(0, 5);
@@ -651,7 +642,7 @@ namespace PlannerApi.Controllers
             return hourlyCounts;
         }
 
-        private float CalculateCompletionRate(List<Models.Task> tasks, List<Models.ShiftTask> shiftTasks)
+        private float CalculateCompletionRate(List<Models.TaskItem> tasks, List<Models.ShiftTask> shiftTasks)
         {
             if (tasks.Count == 0) return 75.5f;
 

@@ -12,7 +12,7 @@ namespace PlannerApi.Models
         public Guid company_id { get; set; }
     }
 
-    public class Task
+    public class TaskItem // Переименован из Task, чтобы избежать конфликта с System.Threading.Tasks.Task
     {
         public Guid uid { get; set; }
         public string name { get; set; } = "";
@@ -23,7 +23,7 @@ namespace PlannerApi.Models
         public Guid company_id { get; set; }
     }
 
-    public class Shift
+    public class WorkShift // Переименован из Shift, чтобы избежать конфликта
     {
         public Guid uid { get; set; }
         public string name { get; set; } = "";
