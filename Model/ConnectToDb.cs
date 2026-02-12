@@ -16,79 +16,40 @@ namespace PlannerApi.Models
         {
             connectionString = configuration.GetConnectionString("PlannerDb")
                 ?? "Server=localhost;Port=5432;Database=Planner;User Id=postgres;Password=1111;";
-
-            Console.WriteLine($"Connecting to database with: {connectionString}");
         }
 
         private NpgsqlConnection GetConnection()
         {
             if (_connection == null)
             {
-                try
-                {
-                    _connection = new NpgsqlConnection(connectionString);
-                    _connection.Open();
-                    Console.WriteLine("Database connection opened successfully");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error opening database connection: {ex.Message}");
-                    throw;
-                }
+                _connection = new NpgsqlConnection(connectionString);
+                _connection.Open();
             }
             return _connection;
         }
 
         public IEnumerable<Resource> GetResources()
         {
-            try
-            {
-                return GetConnection().Query<Resource>("SELECT * FROM resource ORDER BY time_ins DESC");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error getting resources: {ex.Message}");
-                return new List<Resource>();
-            }
+            try { return GetConnection().Query<Resource>("SELECT * FROM resource ORDER BY time_ins DESC"); }
+            catch { return new List<Resource>(); }
         }
 
         public IEnumerable<TaskItem> GetTasks()
         {
-            try
-            {
-                return GetConnection().Query<TaskItem>("SELECT * FROM task ORDER BY time_ins DESC");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error getting tasks: {ex.Message}");
-                return new List<TaskItem>();
-            }
+            try { return GetConnection().Query<TaskItem>("SELECT * FROM task ORDER BY time_ins DESC"); }
+            catch { return new List<TaskItem>(); }
         }
 
         public IEnumerable<WorkShift> GetShifts()
         {
-            try
-            {
-                return GetConnection().Query<WorkShift>("SELECT * FROM shift ORDER BY time_ins DESC");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error getting shifts: {ex.Message}");
-                return new List<WorkShift>();
-            }
+            try { return GetConnection().Query<WorkShift>("SELECT * FROM shift ORDER BY time_ins DESC"); }
+            catch { return new List<WorkShift>(); }
         }
 
         public IEnumerable<ShiftTask> GetShiftTasks()
         {
-            try
-            {
-                return GetConnection().Query<ShiftTask>("SELECT * FROM shift_task ORDER BY time_ins DESC");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error getting shift tasks: {ex.Message}");
-                return new List<ShiftTask>();
-            }
+            try { return GetConnection().Query<ShiftTask>("SELECT * FROM shift_task ORDER BY time_ins DESC"); }
+            catch { return new List<ShiftTask>(); }
         }
 
         public bool PutResource(Resource res)
@@ -99,11 +60,7 @@ namespace PlannerApi.Models
                            VALUES (@uid, @name, @time_ins, @company_id)";
                 return GetConnection().Execute(sql, res) > 0;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error putting resource: {ex.Message}");
-                return false;
-            }
+            catch { return false; }
         }
 
         public bool PutTask(TaskItem task)
@@ -114,11 +71,7 @@ namespace PlannerApi.Models
                            VALUES (@uid, @name, @time_ins, @time_pref_start, @time_pref_finish, @duration, @company_id)";
                 return GetConnection().Execute(sql, task) > 0;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error putting task: {ex.Message}");
-                return false;
-            }
+            catch { return false; }
         }
 
         public bool PutShift(WorkShift shift)
@@ -129,64 +82,13 @@ namespace PlannerApi.Models
                            VALUES (@uid, @name, @time_ins, @resource_id, @time_start, @time_finish, @time_free)";
                 return GetConnection().Execute(sql, shift) > 0;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error putting shift: {ex.Message}");
-                return false;
-            }
+            catch { return false; }
         }
 
-        public bool ClearResources()
-        {
-            try
-            {
-                return GetConnection().Execute("DELETE FROM resource") > 0;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error clearing resources: {ex.Message}");
-                return false;
-            }
-        }
-
-        public bool ClearTasks()
-        {
-            try
-            {
-                return GetConnection().Execute("DELETE FROM task") > 0;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error clearing tasks: {ex.Message}");
-                return false;
-            }
-        }
-
-        public bool ClearShifts()
-        {
-            try
-            {
-                return GetConnection().Execute("DELETE FROM shift") > 0;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error clearing shifts: {ex.Message}");
-                return false;
-            }
-        }
-
-        public bool ClearShiftTasks()
-        {
-            try
-            {
-                return GetConnection().Execute("DELETE FROM shift_task") > 0;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error clearing shift tasks: {ex.Message}");
-                return false;
-            }
-        }
+        public bool ClearResources() { try { return GetConnection().Execute("DELETE FROM resource") > 0; } catch { return false; } }
+        public bool ClearTasks() { try { return GetConnection().Execute("DELETE FROM task") > 0; } catch { return false; } }
+        public bool ClearShifts() { try { return GetConnection().Execute("DELETE FROM shift") > 0; } catch { return false; } }
+        public bool ClearShiftTasks() { try { return GetConnection().Execute("DELETE FROM shift_task") > 0; } catch { return false; } }
 
         public async System.Threading.Tasks.Task StartScheduler(bool sinc = false)
         {
@@ -203,7 +105,6 @@ namespace PlannerApi.Models
                 for (int i = 0; i < tasks.Count; i++)
                 {
                     if (stop) break;
-
                     var taskItem = tasks[i];
                     var availableShifts = shifts.Where(s =>
                         s.time_start <= taskItem.time_pref_finish &&
@@ -212,7 +113,6 @@ namespace PlannerApi.Models
                     foreach (var shift in availableShifts)
                     {
                         if (stop) break;
-
                         var st = new ShiftTask
                         {
                             shift_id = shift.uid,
@@ -224,10 +124,8 @@ namespace PlannerApi.Models
                             time_sched_finish = shift.time_finish < taskItem.time_pref_finish ? shift.time_finish : taskItem.time_pref_finish,
                             idle_dur = 0
                         };
-
                         shiftTasks.Add(st);
                         progress = (int)((i + 1) / (double)tasks.Count * 100);
-
                         await System.Threading.Tasks.Task.Delay(100);
                     }
                 }
@@ -242,19 +140,11 @@ namespace PlannerApi.Models
                                                VALUES (@shift_id, @shift_name, @task_id, @task_name, @time_ins, @time_sched_start, @time_sched_finish, @idle_dur)", st);
                     }
                 }
-
                 progress = 100;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in scheduler: {ex.Message}");
-                asincerrors++;
-            }
+            catch { asincerrors++; }
         }
 
-        public void Dispose()
-        {
-            _connection?.Dispose();
-        }
+        public void Dispose() => _connection?.Dispose();
     }
 }

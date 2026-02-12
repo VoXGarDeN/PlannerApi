@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PlannerApi.Models
 {
-    // Основные сущности
+    // ---------- Основные сущности ----------
     public class Resource
     {
         public Guid uid { get; set; }
@@ -12,7 +12,7 @@ namespace PlannerApi.Models
         public Guid company_id { get; set; }
     }
 
-    public class TaskItem // Переименован из Task, чтобы избежать конфликта с System.Threading.Tasks.Task
+    public class TaskItem
     {
         public Guid uid { get; set; }
         public string name { get; set; } = "";
@@ -23,7 +23,7 @@ namespace PlannerApi.Models
         public Guid company_id { get; set; }
     }
 
-    public class WorkShift // Переименован из Shift, чтобы избежать конфликта
+    public class WorkShift
     {
         public Guid uid { get; set; }
         public string name { get; set; } = "";
@@ -46,7 +46,7 @@ namespace PlannerApi.Models
         public int? idle_dur { get; set; }
     }
 
-    // Модели для дашборда
+    // ---------- Модели для дашборда ----------
     public class DashboardStats
     {
         public int TotalTasks { get; set; }

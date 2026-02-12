@@ -1848,21 +1848,20 @@
         }
 
         // Создание графика распределения статусов
-        function createStatusDistributionChart(statusData) {
+                function createStatusDistributionChart(statusData) {
             const ctx = document.getElementById('statusDistributionChart');
             if (!ctx) return;
 
+            // Если график уже существует – обновляем данные
             if (statusDistributionChart) {
-                statusDistributionChart.destroy();
+                statusDistributionChart.data.datasets[0].data = statusData;
+                statusDistributionChart.update();
+                return;
             }
 
+            // Иначе создаём новый
             const labels = ['Не начато', 'В процессе', 'Завершено', 'Просрочено'];
-            const backgroundColors = [
-                'rgba(156, 163, 175, 0.8)',
-                'rgba(245, 158, 11, 0.8)',
-                'rgba(16, 185, 129, 0.8)',
-                'rgba(239, 68, 68, 0.8)'
-            ];
+            const backgroundColors = ['rgba(156,163,175,0.8)', 'rgba(245,158,11,0.8)', 'rgba(16,185,129,0.8)', 'rgba(239,68,68,0.8)'];
 
             statusDistributionChart = new Chart(ctx, {
                 type: 'doughnut',
@@ -1878,14 +1877,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        }
+                        legend: { position: 'bottom' }
                     }
                 }
             });
